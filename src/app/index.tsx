@@ -13,7 +13,7 @@ export default function Home() {
       </Appbar.Header>
 
       <View style={styles.content}>
-        <Text variant="headlineSmall">Привет, React Native Paper!</Text>
+        <Text variant="headlineSmall">Привет, Алексей!</Text>
         <Button mode="filled" onPress={() => setSnackbarVisible(true)}>
           Нажми меня
         </Button>
