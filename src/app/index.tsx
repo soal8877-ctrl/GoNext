@@ -1,40 +1,50 @@
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Appbar, Button, Snackbar, Text, useTheme } from 'react-native-paper';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { type Href, router } from 'expo-router';
 
-export default function Home() {
+import { ScreenShell } from '@/components/ScreenShell';
+import { screenStyles } from '@/constants/screen';
+
+const MENU_ITEMS = [
+  { label: 'Места', href: '/places' as const },
+  { label: 'Поездки', href: '/trips' as const },
+  { label: 'Следующее место', href: '/next-place' as const },
+  { label: 'Выражения', href: '/phrases' as const },
+  { label: 'Настройки', href: '/settings' as const },
+] as const;
+
+export default function HomeScreen() {
   const theme = useTheme();
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.colors.background }]}>
-      <Appbar.Header>
-        <Appbar.Content title="GoNext" />
-      </Appbar.Header>
-
-      <View style={styles.content}>
-        <Text variant="headlineSmall">Привет, Алексей!</Text>
-        <Button mode="filled" onPress={() => setSnackbarVisible(true)}>
-          Нажми меня
-        </Button>
+    <ScreenShell title="GoNext">
+      <View style={screenStyles.body}>
+        <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          Дневник туриста
+        </Text>
+        <View style={styles.menu}>
+          {MENU_ITEMS.map((item) => (
+            <Button
+              key={item.href}
+              mode="tonal"
+              onPress={() => router.push(item.href as Href)}
+              contentStyle={styles.menuButtonContent}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </View>
       </View>
-
-      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)}>
-        Кнопка нажата
-      </Snackbar>
-    </View>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
+  menu: {
+    marginTop: 8,
+    gap: 10,
   },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    paddingHorizontal: 24,
+  menuButtonContent: {
+    paddingVertical: 6,
   },
 });
