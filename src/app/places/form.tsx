@@ -10,13 +10,16 @@ import {
   formatCoordinatePairForInput,
   parseOptionalCoordinatePair,
 } from '@/utils/coordinates';
+import { addPlaceToTrip } from '@/repositories/tripPlaces';
 import { createPlace, getPlaceById, updatePlace } from '@/repositories/places';
 
 export default function PlaceFormScreen() {
   const db = useSQLiteContext();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, tripId: tripIdParam } = useLocalSearchParams<{ id?: string; tripId?: string }>();
   const placeId = id ? Number(id) : null;
   const isEdit = placeId != null && Number.isFinite(placeId);
+  const attachTripId =
+    tripIdParam != null && Number.isFinite(Number(tripIdParam)) ? Number(tripIdParam) : null;
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -87,7 +90,12 @@ export default function PlaceFormScreen() {
         router.replace(`/places/${placeId}` as Href);
       } else {
         const created = await createPlace(db, payload);
-        router.replace(`/places/${created.id}` as Href);
+        if (attachTripId != null) {
+          await addPlaceToTrip(db, { tripId: attachTripId, placeId: created.id });
+          router.replace(`/trips/${attachTripId}` as Href);
+        } else {
+          router.replace(`/places/${created.id}` as Href);
+        }
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Ошибка сохранения.');

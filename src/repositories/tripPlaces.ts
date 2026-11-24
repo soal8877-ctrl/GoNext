@@ -4,6 +4,12 @@ import { boolToSql, stringifyStringArray } from '@/db/json';
 import { mapTripPlaceRow, type TripPlaceRow } from '@/db/rows';
 import type { CreateTripPlaceInput, TripPlace, UpdateTripPlaceInput } from '@/types/entities';
 
+export type TripPlaceWithPlace = TripPlace & {
+  placeName: string;
+};
+
+type TripPlaceJoinRow = TripPlaceRow & { place_name: string };
+
 async function getNextSortOrder(db: SQLiteDatabase, tripId: number): Promise<number> {
   const row = await db.getFirstAsync<{ max_order: number | null }>(
     'SELECT MAX(sort_order) AS max_order FROM trip_places WHERE trip_id = ?',
@@ -19,6 +25,24 @@ export async function listTripPlaces(db: SQLiteDatabase, tripId: number): Promis
     tripId
   );
   return rows.map(mapTripPlaceRow);
+}
+
+export async function listTripPlacesWithPlaces(
+  db: SQLiteDatabase,
+  tripId: number
+): Promise<TripPlaceWithPlace[]> {
+  const rows = await db.getAllAsync<TripPlaceJoinRow>(
+    `SELECT tp.*, p.name AS place_name
+     FROM trip_places tp
+     INNER JOIN places p ON p.id = tp.place_id
+     WHERE tp.trip_id = ?
+     ORDER BY tp.sort_order ASC, tp.id ASC`,
+    tripId
+  );
+  return rows.map((row) => ({
+    ...mapTripPlaceRow(row),
+    placeName: row.place_name,
+  }));
 }
 
 export async function getTripPlaceById(

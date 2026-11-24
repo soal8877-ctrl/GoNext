@@ -3,16 +3,20 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { FAB, List, Text } from 'react-native-paper';
 import { type Href, router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenShell } from '@/components/ScreenShell';
-import { screenPadding } from '@/constants/screen';
+import { fabBottomInset, listBottomInsetForFab, screenPadding } from '@/constants/screen';
 import { listPlaces } from '@/repositories/places';
 import type { Place } from '@/types/entities';
 
 export default function PlacesListScreen() {
   const db = useSQLiteContext();
+  const insets = useSafeAreaInsets();
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
+  const fabBottom = fabBottomInset(insets.bottom);
+  const listBottomPadding = listBottomInsetForFab(insets.bottom);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,7 +50,7 @@ export default function PlacesListScreen() {
         <FlatList
           data={places}
           keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
           renderItem={({ item }) => (
             <List.Item
               title={item.name}
@@ -68,7 +72,7 @@ export default function PlacesListScreen() {
       <FAB
         icon="plus"
         aria-label="Добавить место"
-        style={styles.fab}
+        style={[styles.fab, { bottom: fabBottom }]}
         onPress={() => router.push('/places/form' as Href)}
       />
     </ScreenShell>
@@ -102,6 +106,5 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: screenPadding,
-    bottom: screenPadding,
   },
 });
