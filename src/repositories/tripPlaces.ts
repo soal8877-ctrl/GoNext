@@ -27,6 +27,23 @@ export async function listTripPlaces(db: SQLiteDatabase, tripId: number): Promis
   return rows.map(mapTripPlaceRow);
 }
 
+/** Первый невизитированный пункт текущего маршрута (по sort_order). */
+export async function getNextUnvisitedTripPlace(
+  db: SQLiteDatabase,
+  tripId: number
+): Promise<TripPlaceWithPlace | null> {
+  const row = await db.getFirstAsync<TripPlaceJoinRow>(
+    `SELECT tp.*, p.name AS place_name
+     FROM trip_places tp
+     INNER JOIN places p ON p.id = tp.place_id
+     WHERE tp.trip_id = ? AND tp.visited = 0
+     ORDER BY tp.sort_order ASC, tp.id ASC
+     LIMIT 1`,
+    tripId
+  );
+  return row ? { ...mapTripPlaceRow(row), placeName: row.place_name } : null;
+}
+
 export async function listTripPlacesWithPlaces(
   db: SQLiteDatabase,
   tripId: number
