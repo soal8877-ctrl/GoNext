@@ -4,8 +4,10 @@ import { Button, Dialog, Portal, Snackbar, Switch, Text } from 'react-native-pap
 import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { PhotoGallery } from '@/components/PhotoGallery';
 import { ScreenShell } from '@/components/ScreenShell';
 import { screenPadding } from '@/constants/screen';
+import { deletePhotoFileAsync } from '@/photos/storage';
 import { deletePlace, getPlaceById, updatePlace } from '@/repositories/places';
 import type { Place } from '@/types/entities';
 import { getCoordinates } from '@/utils/coordinates';
@@ -56,6 +58,9 @@ export default function PlaceDetailScreen() {
     }
     setDeleting(true);
     try {
+      for (const path of place.photos) {
+        await deletePhotoFileAsync(path);
+      }
       const ok = await deletePlace(db, place.id);
       if (!ok) {
         setSnackbar('Не удалось удалить место.');
@@ -120,14 +125,18 @@ export default function PlaceDetailScreen() {
             <Text variant="bodyLarge">Понравилось</Text>
             <Switch value={place.liked} onValueChange={(value) => void toggleFlag('liked', value)} />
           </View>
-          <Text variant="titleSmall" style={styles.section}>
-            Фотографии
-          </Text>
-          <Text variant="bodyMedium" style={styles.meta}>
-            {place.photos.length > 0
-              ? `Сохранено: ${place.photos.length} (полная галерея — этап 6)`
-              : 'Пока нет фото (добавление — этап 6)'}
-          </Text>
+          <PhotoGallery
+            photos={place.photos}
+            category="places"
+            ownerId={place.id}
+            onPhotosChange={async (photos) => {
+              const updated = await updatePlace(db, place.id, { photos });
+              if (updated) {
+                setPlace(updated);
+              }
+            }}
+            onNotify={(message) => setSnackbar(message)}
+          />
           <Button mode="tonal" icon="map" onPress={() => void openMap()}>
             На карте
           </Button>

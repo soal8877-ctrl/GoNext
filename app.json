@@ -33,7 +33,14 @@
           "imageWidth": 76
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "GoNext сохраняет фото мест и поездок на устройстве.",
+          "cameraPermission": "GoNext использует камеру для снимков в дневнике путешествий."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

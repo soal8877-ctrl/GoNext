@@ -15,7 +15,9 @@ import {
 import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { PhotoGallery } from '@/components/PhotoGallery';
 import { ScreenShell } from '@/components/ScreenShell';
+import { deletePhotoFileAsync } from '@/photos/storage';
 import { screenPadding } from '@/constants/screen';
 import { listPlaces } from '@/repositories/places';
 import {
@@ -131,6 +133,9 @@ export default function TripDetailScreen() {
     if (!removeStopTarget) {
       return;
     }
+    for (const path of removeStopTarget.photos) {
+      await deletePhotoFileAsync(path);
+    }
     await removePlaceFromTrip(db, removeStopTarget.id);
     setRemoveStopTarget(null);
     await load();
@@ -185,6 +190,11 @@ export default function TripDetailScreen() {
                 onMoveDown={() => void moveStop(stop.id, 'down')}
                 onRemove={() => setRemoveStopTarget(stop)}
                 onOpenPlace={() => router.push(`/places/${stop.placeId}` as Href)}
+                onPhotosChange={async (photos) => {
+                  await updateTripPlace(db, stop.id, { photos });
+                  await load();
+                }}
+                onNotify={(message) => setSnackbar(message)}
               />
             ))
           )}
@@ -265,6 +275,8 @@ type RouteStopCardProps = {
   onMoveDown: () => void;
   onRemove: () => void;
   onOpenPlace: () => void;
+  onPhotosChange: (photos: string[]) => Promise<void>;
+  onNotify: (message: string) => void;
 };
 
 function RouteStopCard({
@@ -278,6 +290,8 @@ function RouteStopCard({
   onMoveDown,
   onRemove,
   onOpenPlace,
+  onPhotosChange,
+  onNotify,
 }: RouteStopCardProps) {
   const [visitDateText, setVisitDateText] = useState(
     stop.visitDate ? formatDateDisplay(stop.visitDate) : ''
@@ -317,10 +331,14 @@ function RouteStopCard({
         numberOfLines={3}
         onBlur={() => onSaveNotes(notesText)}
       />
-      <Text variant="bodySmall" style={styles.meta}>
-        Фото визита — этап 6
-        {stop.photos.length > 0 ? ` (сохранено: ${stop.photos.length})` : ''}
-      </Text>
+      <PhotoGallery
+        title="Фото визита"
+        photos={stop.photos}
+        category="trip-visits"
+        ownerId={stop.id}
+        onPhotosChange={onPhotosChange}
+        onNotify={onNotify}
+      />
 
       <View style={styles.stopActions}>
         <IconButton icon="chevron-up" disabled={index === 0} onPress={onMoveUp} />
