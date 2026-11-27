@@ -2,7 +2,7 @@
 
 Документ для передачи контекста между чатами Cursor. Детали требований и плана — в [PROJECT.md](./PROJECT.md) и [PLAN.md](./PLAN.md). Границы MVP — в [MVP-SCOPE.md](./MVP-SCOPE.md).
 
-**Обновлено:** 2026-11-19 (по истории диалога; сверить с репозиторием при продолжении).
+**Обновлено:** 2026-11-26 (сверено с репозиторием и диалогом).
 
 ---
 
@@ -16,9 +16,9 @@
 
 ## Текущая задача и этап PLAN.md
 
-- **Этап 3 (Места)** — **требует проверки** (код есть, приёмка на устройстве не подтверждена; мешала ошибка SQLite в Expo Go).
-- **После проверки этапа 3:** плановый следующий этап — **4 — «Поездки»** (PLAN.md §4.2).
-- **PLAN.md** в шапке (строка про «демо Home») **устарела** — не ориентироваться на неё; опираться на этот файл и структуру `src/`.
+- **Плановый фокус:** этап **9** — сквозная приёмка MVP на телефоне (чеклист в README). Этапы **7–8** закрыты по коду.
+- **Этапы 3–6** приняты пользователем на телефоне (Expo Go), **2026-11-26**.
+- **PLAN.md** в шапке (про «демо Home») **устарела** — ориентироваться на этот файл и `src/app/`.
 
 ---
 
@@ -26,22 +26,24 @@
 
 | Этап | Статус | Кратко |
 |------|--------|--------|
-| 0 | Готово | [MVP-SCOPE.md](./MVP-SCOPE.md), 10 фраз, чеклист in/out |
-| 1 | Готово | Меню GoNext, маршруты, `ScreenShell`, заглушки → частично заменены |
-| 2 | Готово | `expo-sqlite`, миграция v1, репозитории, `SQLiteProvider` |
-| 3 | **Требует проверки** | В репозитории: CRUD/UI «Места» (`places/*`, утилиты карт); на телефоне не принят |
-| 7 | Частично | Экран `/phrases` уже показывает 10 фраз из константы (без доработки по этапу 7 формально) |
-| 4–6, 8–9 | Не сделано | Поездки, следующее место, фото, полировка, приёмка |
-
-Дополнительно в этом чате (не по PLAN): минимальный демо-Home заменён; туннель ngrok; `metro.config.js` для web+SQLite; приветствие менялось на «Алексей» (сейчас главное меню, не демо).
+| 0 | Готово | [MVP-SCOPE.md](./MVP-SCOPE.md) |
+| 1 | Готово | Меню GoNext, маршруты, `ScreenShell`, все основные экраны заведены |
+| 2 | Готово | `expo-sqlite`, миграция v1, репозитории, `DatabaseProvider` |
+| 3 | Готово (приёмка в Expo Go) | `places/index`, `form`, `[id]`; координаты **одним полем**; «На карте»; FAB с учётом safe area |
+| 4 | Готово (приёмка в Expo Go) | `trips/index`, `form`, `[id]` — маршрут, текущая поездка, заметки визита |
+| 5 | Готово (приёмка в Expo Go) | `/next-place` — текущая поездка, навигатор, отметка посещения |
+| 6 | Готово (приёмка в Expo Go) | `PhotoGallery`, галерея и камера на телефоне **работают** (подтвердил пользователь 2026-11-26) |
+| 7 | Готово (код) | `/phrases` — 10 фраз из `travelPhrases.ts`, проверка длины; приёмка на телефоне — по чеклисту этапа 9 |
+| 8 | Готово (код) | `settings.tsx`: о приложении, офлайн, SDK, счётчики БД; `expo-doctor` — без замечаний |
+| 9 | Частично | Чеклист в README; сквозной прогон на телефоне — за пользователем |
 
 ---
 
 ## Осталось (MVP)
 
-По [PLAN.md](./PLAN.md): **проверить и закрыть этап 3**; затем этапы **4** (Поездки), **5** (Следующее место), **6** (фото), **7** (довести «Выражения» по чеклисту этапа), **8**, **9**. Этап 10 — вне MVP.
+По [PLAN.md](./PLAN.md): **7**; **8**; **9**. Этап 10 — вне MVP.
 
-Экраны-заглушки: `src/app/trips/*`, `src/app/next-place.tsx` (текст про будущие этапы).
+Заглушек в основных экранах **нет**. `settings.tsx` — минимальный экран «О приложении» без сброса БД.
 
 ---
 
@@ -50,66 +52,70 @@
 | Область | Пути |
 |---------|------|
 | Маршруты | `src/app/` (`index`, `places/*`, `trips/*`, `next-place`, `phrases`, `settings`, `_layout.tsx`) |
-| Корень / БД | `src/db/migrate.ts`, `constants.ts`, `rows.ts`, `json.ts` |
+| БД | `src/db/migrate.ts`, `constants.ts`, `rows.ts`, `json.ts` |
 | Репозитории | `src/repositories/places.ts`, `trips.ts`, `tripPlaces.ts` |
+| Фото | `src/photos/storage.ts`, `picker.ts`; `src/components/PhotoGallery.tsx` |
+| SQLite / web | `src/components/DatabaseProvider.tsx` |
 | Типы | `src/types/entities.ts` |
-| UI-обёртки | `src/components/ScreenShell.tsx`, `RootNavigator.tsx` |
-| Утилиты | `src/utils/coordinates.ts`, `maps.ts` |
-| Фразы | `src/constants/travelPhrases.ts` |
+| UI | `src/components/ScreenShell.tsx`, `RootNavigator.tsx` |
+| Утилиты | `src/utils/coordinates.ts`, `maps.ts`, `dates.ts` |
+| Фразы | `src/constants/travelPhrases.ts`, `src/constants/screen.ts` |
 | Metro (web) | `metro.config.js` |
-| Конфиг Expo | `app.json` (плагины: router, material-design-icons, splash, expo-sqlite) |
+| Конфиг | `app.json` (плагины: router, icons, splash, sqlite, **image-picker**) |
+| Заметки пользователя | [FOR_ME.md](./FOR_ME.md) |
 
-**Заметка:** в репозитории есть `assets/backgrounds/gonext-bg.png` — в переписке интеграция в UI не описана; **проверить**, подключён ли фон в коде.
+**Фон:** `assets/backgrounds/gonext-bg.png` — **в UI не подключён**.
 
 ---
 
-## Технические решения
+## Технические решения (актуальные)
 
-- Навигация: один `Stack`, `headerShown: false`, общий `Appbar` в `ScreenShell`.
-- SQLite: `SQLiteProvider` + `onInit={migrateDatabase}` в `_layout.tsx`; БД `gonext.db`, `PRAGMA user_version = 1`.
-- Координаты: `latitude` / `longitude` в БД; UI — «широта/долгота (DD)».
-- Фото: JSON-массив путей в `photos_json`; галерея — этап 6, на экране места заглушка.
-- Paper v6: у `Button` режим `tonal` (не `contained`); у `TextInput` — `variant="outlined"` (не `mode`).
-- Туннель: для ngrok без аккаунта Expo — `npx expo start --tunnel ngrok`; `@expo/ngrok` в **devDependencies** (глобальная установка на Windows с кириллицей в профиле ломается).
-- Официальный туннель: `npx expo login` → `npx expo start --tunnel`.
+- Навигация: один `Stack`, `headerShown: false`, `ScreenShell` + Paper `Appbar`.
+- SQLite: `DatabaseProvider` с **`useSuspense`**, на web — отложенная инициализация (`document`); `PaperProvider` **снаружи** `DatabaseProvider`.
+- **Web:** из `app.json` убран `"web.output": "server"` (SSR ломал Paper/SQLite). Для отладки web — `metro.config.js` (wasm + COOP/COEP).
+- Координаты: в БД `latitude`/`longitude`; в форме **одна строка** `широта, долгота` (`parseOptionalCoordinatePair`).
+- Карты: `openPlaceOnMap` — на web всегда HTTPS Google Maps; `openPlaceInNavigator` для маршрута.
+- Фото: относительные пути в `photos_json`; файлы в `documentDirectory` + `gonext-photos/{places|trip-visits}/{id}/`; копирование с **fallback base64** для Android `content://`.
+- FAB: `fabBottomInset` / `listBottomInsetForFab` в `screen.ts` (+ запас **48dp** на Android, если safe area = 0).
+- Paper v6: `Button` — `tonal`/`filled`; `TextInput` — `variant="outlined"`.
+- Туннель (ПК и телефон в разных сетях): `npx expo start --tunnel ngrok --clear` (`@expo/ngrok` в devDependencies).
+- Пакеты SDK 58 (пример): `expo ~58.0.26`, `expo-sqlite ~58.0.18`, `expo-image-picker`, `expo-file-system`.
 
 ---
 
 ## Требования пользователя (из диалога)
 
-- Отвечать по-русски; примеры команд — PowerShell.
-- Коммиты только по явной просьбе.
-- Разработка по [PROJECT.md](./PROJECT.md) и [PLAN.md](./PLAN.md); AGENTS.md в корне — правила Expo.
-- Телефон и ПК часто в **разных сетях** — нужен туннель (ngrok).
-- Пользователь **Алексей** (имя упоминалось в раннем демо; актуальный UI — меню GoNext).
+- Русский язык; PowerShell; коммиты **только по запросу**.
+- Разные сети ПК/телефона → **ngrok-туннель**.
+- **Expo Go:** сканер QR часто даёт «scan failed» → **ручной URL** из строки `Metro:` в терминале или QR с `http://localhost:8081` на ПК.
+- USB-вариант: `npx expo start --localhost --clear` + `adb reverse tcp:8081 tcp:8081`, в Expo Go: `exp://127.0.0.1:8081`.
+- Пользователь **Алексей**; актуальный UI — меню **GoNext**, не демо-Home.
 
 ---
 
 ## Известные проблемы и нерешённое
 
-1. **`Cannot find native module 'ExpoSQLite'`** на Android в Expo Go при успешном `Android Bundled`. Пользователь сообщал: Client **58.0.5**, Supported SDK **58**. Выполнено на ПК: `npx expo install --fix` → **expo ~58.0.25**. **Не подтверждено**, что ошибка исчезла после перезапуска и очистки кэша.
-   - Сопутствующие WARN «missing default export» — каскад от падения `_layout`.
-   - Если не помогает: обновить Expo Go до **58.0.7**, очистить данные приложения; запасной путь — **development build** (EAS).
-2. **Web:** без `metro.config.js` был чёрный экран (wasm); с конфигом — меню открывается.
-3. **Туннель:** если в терминале нет `Android Bundled` — телефон не достучался до Metro (сеть/ngrok), не версия SDK.
-4. Плагин `@react-native-vector-icons/material-design-icons` в `app.json` — для нативных сборок; в Expo Go иконки Paper часто через Expo, но плагин оставлен.
+1. **ExpoSQLite** в Expo Go на Android — в старых сессиях; после `expo install --fix` статус на устройстве **не зафиксирован**. Запас: dev build (EAS).
+2. **Web SQLite:** Fast Refresh → OPFS `createSyncAccessHandle` — **F5**; экран ошибки с «Обновить страницу».
+3. **QR в Expo Go:** предпочитать ручной `exps://…` или QR с веб-страницы Metro.
+4. Плагин `expo-image-picker` в `app.json` — для **своей** сборки; в **Expo Go** права настраиваются для приложения **Expo Go**.
+5. **Фото на web** в MVP не поддерживается (подсказка в picker); целевая платформа — телефон.
 
 ---
 
 ## Противоречия / что сверить
 
-- [PLAN.md](./PLAN.md) вводный абзац не отражает текущий код.
-- Этап 7 в плане «не начат», но `/phrases` уже с полным списком — при завершении этапа 7 отметить в плане или handoff.
-- **Этап 3 не закрыт:** приёмка на реальном устройстве (сценарии PLAN.md этап 3) не выполнена или не зафиксирована.
+- [PLAN.md](./PLAN.md) вводный абзац и таблица этапов **отстают** от кода (реализованы 3–6).
+- Этап 9: финальная приёмка MVP на устройстве пользователем ещё не зафиксирована в этом файле.
+- Этапы **3–6** приняты пользователем на телефоне (2026-11-26).
 
 ---
 
 ## Конкретный следующий шаг
 
-1. **Проверить этап 3** на телефоне (или web): запуск без `ExpoSQLite`, CRUD мест, карта, удаление — по чеклисту PLAN.md этап 3.
-2. Убедиться, что приложение **стабильно стартует** (SQLite / Expo Go или dev build).
-3. После закрытия этапа 3 — **PLAN.md этап 4**: UI поездок поверх `repositories/trips.ts` и `tripPlaces.ts`.
-4. Не переделывать этапы 0–2 без запроса; этап 3 при провале приёмки — доработать, не считать завершённым.
+1. **Этап 9** — сквозной прогон чеклиста из [README.md](./README.md) на телефоне (Expo Go); при багах — точечные правки.
+2. После приёмки этапа 9 — отметить в этом файле и при необходимости обновить FOR_ME.
+3. Этап 10 и фон `gonext-bg.png` — вне MVP, только по запросу.
 
 ---
 
@@ -120,16 +126,16 @@
 
 Обязательно в начале работы:
 1. Прочитай AGENT_HANDOFF.md, PROJECT.md и PLAN.md (не доверяй устаревшей шапке PLAN.md про «демо Home»).
-2. Просмотри package.json, src/app/_layout.tsx и состояние экранов в src/app/.
+2. Просмотри package.json, src/app/_layout.tsx, src/components/DatabaseProvider.tsx и экраны в src/app/.
 3. Учти AGENTS.md и пользовательские правила: русский язык, PowerShell, коммиты только по запросу, npx expo install для нативных пакетов, перед завершением — npx tsc --noEmit и npx expo lint.
 
 Контекст из handoff:
-- Этапы 0–2 закрыты; этап 3 (Места) — код есть, но **требует проверки** на устройстве, не считать готовым.
-- Экран /phrases частично закрывает этап 7.
-- После приёмки этапа 3 — этап 4 (Поездки). Заглушки: src/app/trips/*, next-place.tsx.
-- Есть нерешённый риск: ExpoSQLite в Expo Go на Android — сверить, работает ли сейчас; при необходимости EAS development build.
-- Туннель для телефона в другой сети: npx expo start --tunnel ngrok --clear (@expo/ngrok в devDependencies).
-- В assets/backgrounds/gonext-bg.png — проверь, используется ли в UI.
+- Этапы **0–6** закрыты (приёмка 3–6 на телефоне в Expo Go подтверждена пользователем 2026-11-26).
+- Следующий плановый объём: этап 7 (довести «Выражения»), 8 (настройки/полировка), 9 (сквозная приёмка MVP).
+- /phrases частично закрывает этап 7.
+- Туннель для разных сетей: npx expo start --tunnel ngrok --clear. QR часто не работает — ручной Metro URL (exps://…).
+- Web: без web.output server; SQLite через DatabaseProvider + useSuspense.
+- assets/backgrounds/gonext-bg.png в UI не используется.
 
-Задача: сначала помоги проверить/закрыть этап 3, если пользователь не указал иначе; затем этап 4. Этапы 0–2 не переделывать без запроса. Не выдумывай факты; при сомнениях проверь репозиторий.
+Задача: по умолчанию — этапы 7–9; не переделывай 0–2 без запроса; не выдумывай факты, сверяй репозиторий.
 ```

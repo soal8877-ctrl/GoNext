@@ -16,3 +16,7 @@ export const TRAVEL_PHRASES: TravelPhrase[] = [
   { en: 'Where is the train station?', ru: 'Где вокзал?' },
   { en: 'Goodbye!', ru: 'До свидания!' },
 ];
+
+if (TRAVEL_PHRASES.length !== 10) {
+  throw new Error('TRAVEL_PHRASES: в MVP ровно 10 фраз (см. MVP-SCOPE.md).');
+}

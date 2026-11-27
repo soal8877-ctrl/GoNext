@@ -5,17 +5,18 @@ import { ScreenShell } from '@/components/ScreenShell';
 import { TRAVEL_PHRASES } from '@/constants/travelPhrases';
 import { screenPadding } from '@/constants/screen';
 
-/** Предпросмотр списка фраз (полный экран — этап 7). */
+/** Экран «Выражения» (PROJECT.md §4.4): фиксированный список, без БД и сети. */
 export default function PhrasesScreen() {
   return (
     <ScreenShell title="Выражения" showBack>
       <View style={styles.listWrap}>
         <Text variant="bodyMedium" style={styles.hint}>
-          Офлайн-шпаргалка из 10 фраз (MVP).
+          Десять частых фраз для поездки. Работает без интернета.
         </Text>
         <FlatList
           data={TRAVEL_PHRASES}
           keyExtractor={(_, index) => String(index)}
+          contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={Divider}
           renderItem={({ item, index }) => (
             <List.Item
@@ -40,6 +41,9 @@ const styles = StyleSheet.create({
   listWrap: {
     flex: 1,
     paddingHorizontal: screenPadding,
+  },
+  listContent: {
+    paddingBottom: 24,
   },
   hint: {
     marginVertical: 8,
