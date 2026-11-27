@@ -17,6 +17,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { PhotoGallery } from '@/components/PhotoGallery';
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenEmpty, ScreenLoading } from '@/components/ScreenStatus';
 import { deletePhotoFileAsync } from '@/photos/storage';
 import { screenPadding } from '@/constants/screen';
 import { listPlaces } from '@/repositories/places';
@@ -144,13 +145,9 @@ export default function TripDetailScreen() {
   return (
     <ScreenShell title={trip?.title ?? 'Поездка'} showBack>
       {loading ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Загрузка…</Text>
-        </View>
+        <ScreenLoading />
       ) : !trip ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Поездка не найдена.</Text>
-        </View>
+        <ScreenEmpty title="Поездка не найдена" hint="Возможно, запись была удалена." />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
           {trip.current ? (
@@ -355,12 +352,6 @@ const styles = StyleSheet.create({
     padding: screenPadding,
     gap: 12,
     paddingBottom: 32,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: screenPadding,
   },
   meta: {
     opacity: 0.8,

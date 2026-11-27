@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Button, Snackbar, Text } from 'react-native-paper';
 import { type Href, router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenEmpty, ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
 import { getPlaceById } from '@/repositories/places';
 import { getNextUnvisitedTripPlace, updateTripPlace } from '@/repositories/tripPlaces';
@@ -119,36 +120,28 @@ export default function NextPlaceScreen() {
   return (
     <ScreenShell title="Следующее место" showBack>
       {loading ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Загрузка…</Text>
-        </View>
+        <ScreenLoading />
       ) : noCurrentTrip ? (
-        <View style={styles.centered}>
-          <Text variant="titleMedium" style={styles.message}>
-            Нет текущей поездки
-          </Text>
-          <Text variant="bodyMedium" style={styles.hint}>
-            Назначьте поездку текущей в разделе «Поездки», чтобы увидеть следующую точку маршрута.
-          </Text>
+        <ScreenEmpty
+          title="Нет текущей поездки"
+          hint="Назначьте поездку текущей в разделе «Поездки», чтобы увидеть следующую точку маршрута."
+        >
           <Button mode="tonal" onPress={() => router.push('/trips' as Href)}>
             К поездкам
           </Button>
-        </View>
+        </ScreenEmpty>
       ) : allVisited ? (
-        <View style={styles.centered}>
-          <Text variant="titleMedium" style={styles.message}>
-            Маршрут пройден
-          </Text>
-          <Text variant="bodyMedium" style={styles.hint}>
-            В поездке «{allVisited.trip.title}» все места отмечены как посещённые.
-          </Text>
+        <ScreenEmpty
+          title="Маршрут пройден"
+          hint={`В поездке «${allVisited.trip.title}» все места отмечены как посещённые.`}
+        >
           <Button
             mode="tonal"
             onPress={() => router.push(`/trips/${allVisited.trip.id}` as Href)}
           >
             Открыть поездку
           </Button>
-        </View>
+        </ScreenEmpty>
       ) : next ? (
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text variant="labelLarge" style={styles.meta}>
@@ -188,20 +181,6 @@ const styles = StyleSheet.create({
     padding: screenPadding,
     gap: 16,
     paddingBottom: 32,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: screenPadding,
-    gap: 12,
-  },
-  message: {
-    textAlign: 'center',
-  },
-  hint: {
-    textAlign: 'center',
-    opacity: 0.8,
   },
   meta: {
     opacity: 0.85,

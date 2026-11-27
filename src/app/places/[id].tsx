@@ -6,6 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { PhotoGallery } from '@/components/PhotoGallery';
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenEmpty, ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
 import { deletePhotoFileAsync } from '@/photos/storage';
 import { deletePlace, getPlaceById, updatePlace } from '@/repositories/places';
@@ -99,13 +100,9 @@ export default function PlaceDetailScreen() {
   return (
     <ScreenShell title={place?.name ?? 'Место'} showBack>
       {loading ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Загрузка…</Text>
-        </View>
+        <ScreenLoading />
       ) : !place ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Место не найдено.</Text>
-        </View>
+        <ScreenEmpty title="Место не найдено" hint="Возможно, запись была удалена." />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text variant="bodyLarge">{place.description || 'Нет описания'}</Text>
@@ -181,12 +178,6 @@ const styles = StyleSheet.create({
     padding: screenPadding,
     gap: 16,
     paddingBottom: 32,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: screenPadding,
   },
   meta: {
     opacity: 0.8,

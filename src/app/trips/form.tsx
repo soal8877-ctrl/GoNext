@@ -5,6 +5,7 @@ import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-ro
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
 import { createTrip, deleteTrip, getTripById, updateTrip } from '@/repositories/trips';
 import { formatDateDisplay, parseOptionalIsoDate } from '@/utils/dates';
@@ -125,10 +126,10 @@ export default function TripFormScreen() {
 
   return (
     <ScreenShell title={isEdit ? 'Редактировать поездку' : 'Новая поездка'} showBack>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {loading ? (
-          <Text variant="bodyLarge">Загрузка…</Text>
-        ) : (
+      {loading ? (
+        <ScreenLoading />
+      ) : (
+        <ScrollView contentContainerStyle={styles.scroll}>
           <>
             <TextInput
               label="Название"
@@ -177,8 +178,8 @@ export default function TripFormScreen() {
               </Button>
             ) : null}
           </>
-        )}
-      </ScrollView>
+        </ScrollView>
+      )}
 
       <Portal>
         <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>

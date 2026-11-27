@@ -5,6 +5,7 @@ import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-ro
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
 import {
   formatCoordinatePairForInput,
@@ -106,10 +107,10 @@ export default function PlaceFormScreen() {
 
   return (
     <ScreenShell title={isEdit ? 'Редактировать место' : 'Новое место'} showBack>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {loading ? (
-          <Text variant="bodyLarge">Загрузка…</Text>
-        ) : (
+      {loading ? (
+        <ScreenLoading />
+      ) : (
+        <ScrollView contentContainerStyle={styles.scroll}>
           <>
             <TextInput
               label="Название"
@@ -152,8 +153,8 @@ export default function PlaceFormScreen() {
               Сохранить
             </Button>
           </>
-        )}
-      </ScrollView>
+        </ScrollView>
+      )}
       <Snackbar visible={error != null} onDismiss={() => setError(null)} duration={4000}>
         {error}
       </Snackbar>

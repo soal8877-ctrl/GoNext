@@ -6,6 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenEmpty, ScreenLoading } from '@/components/ScreenStatus';
 import { fabBottomInset, listBottomInsetForFab, screenPadding } from '@/constants/screen';
 import { listPlaces } from '@/repositories/places';
 import type { Place } from '@/types/entities';
@@ -34,18 +35,12 @@ export default function PlacesListScreen() {
   return (
     <ScreenShell title="Места" showBack>
       {loading && places.length === 0 ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Загрузка…</Text>
-        </View>
+        <ScreenLoading />
       ) : places.length === 0 ? (
-        <View style={styles.centered}>
-          <Text variant="titleMedium" style={styles.emptyTitle}>
-            Пока нет мест
-          </Text>
-          <Text variant="bodyMedium" style={styles.emptyHint}>
-            Добавьте интересные точки для будущих поездок.
-          </Text>
-        </View>
+        <ScreenEmpty
+          title="Пока нет мест"
+          hint="Добавьте интересные точки для будущих поездок."
+        />
       ) : (
         <FlatList
           data={places}
@@ -82,20 +77,6 @@ export default function PlacesListScreen() {
 const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 88,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: screenPadding,
-    gap: 8,
-  },
-  emptyTitle: {
-    textAlign: 'center',
-  },
-  emptyHint: {
-    textAlign: 'center',
-    opacity: 0.75,
   },
   badges: {
     justifyContent: 'center',

@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { Chip, FAB, List, Text } from 'react-native-paper';
+import { Chip, FAB, List } from 'react-native-paper';
 import { type Href, router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenShell } from '@/components/ScreenShell';
+import { ScreenEmpty, ScreenLoading } from '@/components/ScreenStatus';
 import { fabBottomInset, listBottomInsetForFab, screenPadding } from '@/constants/screen';
 import { listTrips } from '@/repositories/trips';
 import type { Trip } from '@/types/entities';
@@ -35,18 +36,12 @@ export default function TripsListScreen() {
   return (
     <ScreenShell title="Поездки" showBack>
       {loading && trips.length === 0 ? (
-        <View style={styles.centered}>
-          <Text variant="bodyLarge">Загрузка…</Text>
-        </View>
+        <ScreenLoading />
       ) : trips.length === 0 ? (
-        <View style={styles.centered}>
-          <Text variant="titleMedium" style={styles.emptyTitle}>
-            Пока нет поездок
-          </Text>
-          <Text variant="bodyMedium" style={styles.emptyHint}>
-            Спланируйте маршрут и отмечайте посещённые места по ходу пути.
-          </Text>
-        </View>
+        <ScreenEmpty
+          title="Пока нет поездок"
+          hint="Спланируйте маршрут и отмечайте посещённые места по ходу пути."
+        />
       ) : (
         <FlatList
           data={trips}
@@ -84,20 +79,6 @@ export default function TripsListScreen() {
 const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 88,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: screenPadding,
-    gap: 8,
-  },
-  emptyTitle: {
-    textAlign: 'center',
-  },
-  emptyHint: {
-    textAlign: 'center',
-    opacity: 0.75,
   },
   badge: {
     justifyContent: 'center',

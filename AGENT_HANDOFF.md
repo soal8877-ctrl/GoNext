@@ -2,7 +2,7 @@
 
 Документ для передачи контекста между чатами Cursor. Детали требований и плана — в [PROJECT.md](./PROJECT.md) и [PLAN.md](./PLAN.md). Границы MVP — в [MVP-SCOPE.md](./MVP-SCOPE.md).
 
-**Обновлено:** 2026-11-26 (сверено с репозиторием и диалогом).
+**Обновлено:** 2026-11-27 (этапы 7–8, утверждение фраз).
 
 ---
 
@@ -16,7 +16,7 @@
 
 ## Текущая задача и этап PLAN.md
 
-- **Плановый фокус:** этап **9** — сквозная приёмка MVP на телефоне (чеклист в README). Этапы **7–8** закрыты по коду.
+- **Плановый фокус:** этап **9** — сквозная приёмка MVP на телефоне (чеклист в README). Этапы **7–8** закрыты.
 - **Этапы 3–6** приняты пользователем на телефоне (Expo Go), **2026-11-26**.
 - **PLAN.md** в шапке (про «демо Home») **устарела** — ориентироваться на этот файл и `src/app/`.
 
@@ -33,17 +33,17 @@
 | 4 | Готово (приёмка в Expo Go) | `trips/index`, `form`, `[id]` — маршрут, текущая поездка, заметки визита |
 | 5 | Готово (приёмка в Expo Go) | `/next-place` — текущая поездка, навигатор, отметка посещения |
 | 6 | Готово (приёмка в Expo Go) | `PhotoGallery`, галерея и камера на телефоне **работают** (подтвердил пользователь 2026-11-26) |
-| 7 | Готово (код) | `/phrases` — 10 фраз из `travelPhrases.ts`, проверка длины; приёмка на телефоне — по чеклисту этапа 9 |
-| 8 | Готово (код) | `settings.tsx`: о приложении, офлайн, SDK, счётчики БД; `expo-doctor` — без замечаний |
+| 7 | Готово | Фразы **утверждены заказчиком 2026-11-27**; `/phrases`, `MVP-SCOPE.md` |
+| 8 | Готово | `settings.tsx` (List), `ScreenLoading`/`ScreenEmpty`, ActivityIndicator в `DatabaseProvider` |
 | 9 | Частично | Чеклист в README; сквозной прогон на телефоне — за пользователем |
 
 ---
 
 ## Осталось (MVP)
 
-По [PLAN.md](./PLAN.md): **7**; **8**; **9**. Этап 10 — вне MVP.
+По [PLAN.md](./PLAN.md): **9** (сквозная приёмка). Этап 10 — вне MVP.
 
-Заглушек в основных экранах **нет**. `settings.tsx` — минимальный экран «О приложении» без сброса БД.
+Заглушек в основных экранах **нет**. Сброс БД в настройках не реализован (осознанно для MVP); в `settings` указано, как очистить данные в Expo Go.
 
 ---
 
@@ -57,7 +57,7 @@
 | Фото | `src/photos/storage.ts`, `picker.ts`; `src/components/PhotoGallery.tsx` |
 | SQLite / web | `src/components/DatabaseProvider.tsx` |
 | Типы | `src/types/entities.ts` |
-| UI | `src/components/ScreenShell.tsx`, `RootNavigator.tsx` |
+| UI | `src/components/ScreenShell.tsx`, `ScreenStatus.tsx`, `RootNavigator.tsx` |
 | Утилиты | `src/utils/coordinates.ts`, `maps.ts`, `dates.ts` |
 | Фразы | `src/constants/travelPhrases.ts`, `src/constants/screen.ts` |
 | Metro (web) | `metro.config.js` |

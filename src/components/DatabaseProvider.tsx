@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode, Suspense } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { ActivityIndicator, Button } from 'react-native-paper';
 import { SQLiteProvider } from 'expo-sqlite';
 
 import { DATABASE_NAME } from '@/db/constants';
@@ -8,7 +8,8 @@ import { migrateDatabase } from '@/db/migrate';
 
 function DatabaseLoading() {
   return (
-    <View style={styles.center}>
+    <View style={styles.center} accessibilityRole="progressbar" accessibilityLabel="Подготовка базы">
+      <ActivityIndicator animating size="large" />
       <Text style={styles.loadingText}>Подготовка базы данных…</Text>
     </View>
   );

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Divider, List, Text } from 'react-native-paper';
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { ScreenShell } from '@/components/ScreenShell';
-import { screenStyles } from '@/constants/screen';
+import { ScreenLoading } from '@/components/ScreenStatus';
+import { screenPadding } from '@/constants/screen';
 import { listPlaces, listTrips } from '@/repositories';
 
 export default function SettingsScreen() {
@@ -23,22 +24,77 @@ export default function SettingsScreen() {
 
   return (
     <ScreenShell title="Настройки" showBack>
-      <View style={screenStyles.body}>
-        <Text variant="bodyLarge">
-          GoNext — дневник туриста.{'\n\n'}
-          Все данные (места, поездки, фото) хранятся только на этом устройстве. Регистрация и
-          облако не используются.{'\n\n'}
-          Списки, поездки и «Выражения» работают в авиарежиме. Карта и навигатор открывают
-          внешние приложения и могут потребовать сеть.{'\n\n'}
-          Версия приложения: {version}
-          {'\n'}
-          Expo SDK: {sdkVersion}
-          {'\n\n'}
-          {counts
-            ? `В базе: мест — ${counts.places}, поездок — ${counts.trips}.`
-            : 'Подключение к базе данных…'}
-        </Text>
-      </View>
+      {counts === null ? (
+        <ScreenLoading />
+      ) : (
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <Text variant="bodyMedium" style={styles.lead}>
+            GoNext — дневник туриста. Все режимы из главного меню доступны без регистрации.
+          </Text>
+          <List.Section>
+            <List.Subheader>Данные на устройстве</List.Subheader>
+            <List.Item
+              title="Локальное хранение"
+              description="Места, поездки и фото не отправляются на сервер. Резервное копирование в MVP не предусмотрено."
+              left={(props) => <List.Icon {...props} icon="database" />}
+            />
+            <Divider />
+            <List.Item
+              title="Справочник и поездки"
+              description={`Мест: ${counts.places}, поездок: ${counts.trips}.`}
+              left={(props) => <List.Icon {...props} icon="counter" />}
+            />
+          </List.Section>
+          <List.Section>
+            <List.Subheader>Офлайн и карты</List.Subheader>
+            <List.Item
+              title="Авиарежим"
+              description="Списки, поездки, «Выражения» и фото на устройстве работают без интернета."
+              left={(props) => <List.Icon {...props} icon="airplane" />}
+            />
+            <Divider />
+            <List.Item
+              title="Карта и навигатор"
+              description="Открывают внешние приложения; для маршрута может понадобиться сеть."
+              left={(props) => <List.Icon {...props} icon="map" />}
+            />
+          </List.Section>
+          <List.Section>
+            <List.Subheader>О приложении</List.Subheader>
+            <List.Item
+              title={`Версия ${version}`}
+              description={`Expo SDK ${sdkVersion}`}
+              left={(props) => <List.Icon {...props} icon="information" />}
+            />
+          </List.Section>
+          <View style={styles.footer}>
+            <Text variant="labelMedium" style={styles.footerText}>
+              Сброс базы в MVP не предусмотрен. Для полной очистки — удалите данные Expo Go для
+              этого проекта или переустановите dev-сборку.
+            </Text>
+          </View>
+        </ScrollView>
+      )}
     </ScreenShell>
   );
 }
+
+const styles = StyleSheet.create({
+  scroll: {
+    paddingBottom: 32,
+  },
+  lead: {
+    paddingHorizontal: screenPadding,
+    paddingTop: 8,
+    paddingBottom: 4,
+    opacity: 0.9,
+  },
+  footer: {
+    paddingHorizontal: screenPadding,
+    paddingTop: 8,
+  },
+  footerText: {
+    opacity: 0.7,
+    lineHeight: 20,
+  },
+});
