@@ -63,3 +63,12 @@
 
 - [x] Этап 7: 10 фраз утверждены; `travelPhrases.ts` + экран `/phrases`  
 - [x] Этап 8: экран «Настройки», единые `ScreenLoading` / `ScreenEmpty`, `expo-doctor` без замечаний  
+
+## Приёмка этапа 9 (MVP)
+
+- [x] `npm run verify`, `expo-doctor` 20/20 (**2026-11-27**)
+- [x] [ACCEPTANCE.md](./ACCEPTANCE.md) — сквозные сценарии и привязка к экранам
+- [x] README обновлён (запуск, туннель, verify)
+- [ ] Галочки ручного прогона на телефоне в ACCEPTANCE.md (по желанию заказчика)
+
+**MVP по объёму [MVP-SCOPE.md](./MVP-SCOPE.md) и [PLAN.md](./PLAN.md) этапы 0–9 — поставка закрыта.**
