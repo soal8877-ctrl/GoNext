@@ -14,6 +14,7 @@ import {
 } from 'react-native-paper';
 import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
 import { PhotoGallery } from '@/components/PhotoGallery';
 import { ScreenShell } from '@/components/ScreenShell';
@@ -35,6 +36,7 @@ import { formatDateDisplay, formatTripDateRange, parseOptionalIsoDate, todayIsoD
 
 export default function TripDetailScreen() {
   const db = useSQLiteContext();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const tripId = Number(id);
 
@@ -94,9 +96,9 @@ export default function TripDetailScreen() {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       if (message.includes('UNIQUE') || message.includes('constraint')) {
-        setSnackbar('Это место уже в маршруте.');
+        setSnackbar(t('trips.placeAlreadyInRoute'));
       } else {
-        setSnackbar('Не удалось добавить место.');
+        setSnackbar(t('trips.addPlaceFailed'));
       }
     }
   };
@@ -143,16 +145,16 @@ export default function TripDetailScreen() {
   };
 
   return (
-    <ScreenShell title={trip?.title ?? 'Поездка'} showBack>
+    <ScreenShell title={trip?.title ?? t('trips.detailTitle')} showBack>
       {loading ? (
         <ScreenLoading />
       ) : !trip ? (
-        <ScreenEmpty title="Поездка не найдена" hint="Возможно, запись была удалена." />
+        <ScreenEmpty title={t('trips.notFound')} hint={t('common.recordMaybeDeleted')} />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
           {trip.current ? (
             <Chip icon="star" mode="flat" style={styles.currentChip}>
-              Текущая поездка
+              {t('trips.currentTripChip')}
             </Chip>
           ) : null}
           <Text variant="bodyMedium" style={styles.meta}>
@@ -163,15 +165,15 @@ export default function TripDetailScreen() {
             mode="outlined"
             onPress={() => router.push(`/trips/form?id=${trip.id}` as Href)}
           >
-            Редактировать поездку
+            {t('trips.editTrip')}
           </Button>
 
           <Divider style={styles.sectionDivider} />
-          <Text variant="titleMedium">Маршрут</Text>
+          <Text variant="titleMedium">{t('trips.route')}</Text>
 
           {stops.length === 0 ? (
             <Text variant="bodyMedium" style={styles.meta}>
-              Добавьте места из справочника или создайте новое.
+              {t('trips.routeEmpty')}
             </Text>
           ) : (
             stops.map((stop, index) => (
@@ -197,21 +199,19 @@ export default function TripDetailScreen() {
           )}
 
           <Button mode="tonal" icon="plus" onPress={openAddDialog}>
-            Добавить место в маршрут
+            {t('trips.addToRoute')}
           </Button>
         </ScrollView>
       )}
 
       <Portal>
         <Dialog visible={addDialogVisible} onDismiss={() => setAddDialogVisible(false)}>
-          <Dialog.Title>Добавить место</Dialog.Title>
+          <Dialog.Title>{t('trips.addPlaceTitle')}</Dialog.Title>
           <Dialog.ScrollArea style={styles.dialogScroll}>
             <ScrollView>
               {availablePlaces.length === 0 ? (
                 <Text variant="bodyMedium" style={styles.dialogHint}>
-                  {allPlaces.length === 0
-                    ? 'Справочник мест пуст. Создайте место ниже.'
-                    : 'Все места уже в маршруте или справочник пуст.'}
+                  {allPlaces.length === 0 ? t('trips.pickerEmpty') : t('trips.pickerAllUsed')}
                 </Text>
               ) : (
                 availablePlaces.map((place) => (
@@ -228,28 +228,28 @@ export default function TripDetailScreen() {
             </ScrollView>
           </Dialog.ScrollArea>
           <Dialog.Actions>
-            <Button onPress={() => setAddDialogVisible(false)}>Отмена</Button>
+            <Button onPress={() => setAddDialogVisible(false)}>{t('common.cancel')}</Button>
             <Button
               onPress={() => {
                 setAddDialogVisible(false);
                 router.push(`/places/form?tripId=${tripId}` as Href);
               }}
             >
-              Создать новое
+              {t('trips.createNew')}
             </Button>
           </Dialog.Actions>
         </Dialog>
 
         <Dialog visible={removeStopTarget != null} onDismiss={() => setRemoveStopTarget(null)}>
-          <Dialog.Title>Убрать из маршрута?</Dialog.Title>
+          <Dialog.Title>{t('trips.removeFromRouteTitle')}</Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium">
-              «{removeStopTarget?.placeName}» останется в справочнике мест.
+              {t('trips.removeFromRouteBody', { name: removeStopTarget?.placeName ?? '' })}
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setRemoveStopTarget(null)}>Отмена</Button>
-            <Button onPress={() => void confirmRemoveStop()}>Убрать</Button>
+            <Button onPress={() => setRemoveStopTarget(null)}>{t('common.cancel')}</Button>
+            <Button onPress={() => void confirmRemoveStop()}>{t('common.remove')}</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -290,6 +290,7 @@ function RouteStopCard({
   onPhotosChange,
   onNotify,
 }: RouteStopCardProps) {
+  const { t } = useTranslation();
   const [visitDateText, setVisitDateText] = useState(
     stop.visitDate ? formatDateDisplay(stop.visitDate) : ''
   );
@@ -302,25 +303,25 @@ function RouteStopCard({
           {index + 1}. {stop.placeName}
         </Text>
         <Chip compact mode={stop.visited ? 'flat' : 'outlined'} icon={stop.visited ? 'check' : 'map-marker'}>
-          {stop.visited ? 'Посещено' : 'В плане'}
+          {stop.visited ? t('trips.visited') : t('trips.planned')}
         </Chip>
       </View>
 
       <View style={styles.switchRow}>
-        <Text variant="bodyLarge">Посетил</Text>
+        <Text variant="bodyLarge">{t('trips.visitedSwitch')}</Text>
         <Switch value={stop.visited} onValueChange={onToggleVisited} />
       </View>
 
       <TextInput
-        label="Дата визита"
+        label={t('trips.visitDate')}
         value={visitDateText}
         onChangeText={setVisitDateText}
         variant="outlined"
-        placeholder="ДД.ММ.ГГГГ"
+        placeholder={t('trips.datePlaceholder')}
         onBlur={() => onSaveVisitDate(visitDateText)}
       />
       <TextInput
-        label="Заметки"
+        label={t('trips.notes')}
         value={notesText}
         onChangeText={setNotesText}
         variant="outlined"
@@ -329,7 +330,7 @@ function RouteStopCard({
         onBlur={() => onSaveNotes(notesText)}
       />
       <PhotoGallery
-        title="Фото визита"
+        title={t('trips.visitPhotos')}
         photos={stop.photos}
         category="trip-visits"
         ownerId={stop.id}

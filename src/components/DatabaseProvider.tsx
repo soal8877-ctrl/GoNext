@@ -1,16 +1,20 @@
 import { Component, type ErrorInfo, type ReactNode, Suspense } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { ActivityIndicator, Button } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 import { SQLiteProvider } from 'expo-sqlite';
 
+import { DatabaseErrorFallback } from '@/components/DatabaseErrorFallback';
 import { DATABASE_NAME } from '@/db/constants';
 import { migrateDatabase } from '@/db/migrate';
 
 function DatabaseLoading() {
+  const { t } = useTranslation();
+
   return (
-    <View style={styles.center} accessibilityRole="progressbar" accessibilityLabel="Подготовка базы">
+    <View style={styles.center} accessibilityRole="progressbar" accessibilityLabel={t('database.preparingA11y')}>
       <ActivityIndicator animating size="large" />
-      <Text style={styles.loadingText}>Подготовка базы данных…</Text>
+      <Text style={styles.loadingText}>{t('database.preparing')}</Text>
     </View>
   );
 }
@@ -31,7 +35,7 @@ class DatabaseErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryS
   }
 
   componentDidCatch(error: Error, _info: ErrorInfo) {
-    console.error('[SQLite] Ошибка инициализации:', error);
+    console.error('[SQLite] init error:', error);
   }
 
   private handleAction = () => {
@@ -47,17 +51,11 @@ class DatabaseErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryS
     if (error) {
       const showWebReloadHint = Platform.OS === 'web' && isOpfsAccessHandleError(error);
       return (
-        <View style={styles.center}>
-          <Text style={styles.message}>Не удалось открыть базу данных</Text>
-          <Text style={styles.hint}>
-            {showWebReloadHint
-              ? 'На web так бывает после быстрого обновления кода (Fast Refresh). Обновите страницу полностью — F5.'
-              : error.message}
-          </Text>
-          <Button mode="filled" onPress={this.handleAction} style={styles.action}>
-            {Platform.OS === 'web' ? 'Обновить страницу' : 'Повторить'}
-          </Button>
-        </View>
+        <DatabaseErrorFallback
+          error={error}
+          showWebReloadHint={showWebReloadHint}
+          onAction={this.handleAction}
+        />
       );
     }
     return this.props.children;
@@ -96,18 +94,5 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-  },
-  message: {
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  hint: {
-    textAlign: 'center',
-    opacity: 0.85,
-    fontSize: 14,
-  },
-  action: {
-    marginTop: 8,
   },
 });

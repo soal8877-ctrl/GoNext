@@ -1,3 +1,5 @@
+import { translate } from '@/i18n';
+
 export type DateParseResult =
   | { ok: true; value: string | null }
   | { ok: false; message: string };
@@ -18,15 +20,18 @@ export function formatDateDisplay(iso: string | null | undefined): string {
 
 export function formatTripDateRange(start: string | null, end: string | null): string {
   if (!start && !end) {
-    return 'Без дат';
+    return translate('dates.noDates');
   }
   if (start && end) {
-    return `${formatDateDisplay(start)} — ${formatDateDisplay(end)}`;
+    return translate('dates.range', {
+      start: formatDateDisplay(start),
+      end: formatDateDisplay(end),
+    });
   }
   if (start) {
-    return `с ${formatDateDisplay(start)}`;
+    return translate('dates.from', { date: formatDateDisplay(start) });
   }
-  return `до ${formatDateDisplay(end)}`;
+  return translate('dates.until', { date: formatDateDisplay(end) });
 }
 
 function isValidCalendarDate(year: number, month: number, day: number): boolean {
@@ -59,7 +64,7 @@ export function parseOptionalIsoDate(input: string): DateParseResult {
     if (!ruMatch) {
       return {
         ok: false,
-        message: 'Дата: ГГГГ-ММ-ДД или ДД.ММ.ГГГГ (или пусто).',
+        message: translate('dates.invalidFormat'),
       };
     }
     day = Number(ruMatch[1]);
@@ -68,7 +73,7 @@ export function parseOptionalIsoDate(input: string): DateParseResult {
   }
 
   if (!isValidCalendarDate(year, month, day)) {
-    return { ok: false, message: 'Некорректная дата.' };
+    return { ok: false, message: translate('dates.invalid') };
   }
 
   const mm = String(month).padStart(2, '0');

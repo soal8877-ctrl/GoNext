@@ -1,5 +1,7 @@
 import * as LegacyFS from 'expo-file-system/legacy';
 
+import { translate } from '@/i18n';
+
 export const PHOTOS_ROOT = 'gonext-photos';
 
 export type PhotoCategory = 'places' | 'trip-visits';
@@ -7,7 +9,7 @@ export type PhotoCategory = 'places' | 'trip-visits';
 function requireDocumentDirectory(): string {
   const base = LegacyFS.documentDirectory;
   if (!base) {
-    throw new Error('Локальное хранилище недоступно.');
+    throw new Error(translate('storage.unavailable'));
   }
   return base;
 }
@@ -43,7 +45,7 @@ export async function savePickedImageAsync(
 
   const info = await LegacyFS.getInfoAsync(destinationUri);
   if (!info.exists || (info.size != null && info.size <= 0)) {
-    throw new Error('Файл фото не сохранился. Попробуйте другое изображение.');
+    throw new Error(translate('storage.notSaved'));
   }
 
   return relative;
@@ -66,7 +68,7 @@ async function copyUriToDestination(sourceUri: string, destinationUri: string): 
     });
   } catch (e) {
     throw new Error(
-      e instanceof Error ? e.message : 'Не удалось скопировать выбранное фото в память приложения.'
+      e instanceof Error ? e.message : translate('storage.copyFailed')
     );
   }
 }

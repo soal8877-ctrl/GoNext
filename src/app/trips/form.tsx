@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Dialog, Portal, Snackbar, Switch, Text, TextInput } from 'react-native-paper';
 import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
 import { ScreenShell } from '@/components/ScreenShell';
 import { ScreenLoading } from '@/components/ScreenStatus';
@@ -12,6 +13,7 @@ import { formatDateDisplay, parseOptionalIsoDate } from '@/utils/dates';
 
 export default function TripFormScreen() {
   const db = useSQLiteContext();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const tripId = id ? Number(id) : null;
   const isEdit = tripId != null && Number.isFinite(tripId);
@@ -35,7 +37,7 @@ export default function TripFormScreen() {
     setLoading(true);
     const trip = await getTripById(db, tripId);
     if (!trip) {
-      setError('Поездка не найдена.');
+      setError(t('trips.notFoundLoad'));
       setLoading(false);
       return;
     }
@@ -45,7 +47,7 @@ export default function TripFormScreen() {
     setEndDateText(trip.endDate ? formatDateDisplay(trip.endDate) : '');
     setCurrent(trip.current);
     setLoading(false);
-  }, [db, isEdit, tripId]);
+  }, [db, isEdit, tripId, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -57,7 +59,7 @@ export default function TripFormScreen() {
     setFieldError(null);
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      setFieldError('Введите название поездки.');
+      setFieldError(t('trips.titleRequired'));
       return;
     }
 
@@ -72,7 +74,7 @@ export default function TripFormScreen() {
       return;
     }
     if (start.value && end.value && start.value > end.value) {
-      setFieldError('Дата начала не может быть позже даты окончания.');
+      setFieldError(t('trips.dateRangeInvalid'));
       return;
     }
 
@@ -89,7 +91,7 @@ export default function TripFormScreen() {
       if (isEdit && tripId != null) {
         const updated = await updateTrip(db, tripId, payload);
         if (!updated) {
-          setError('Не удалось сохранить изменения.');
+          setError(t('common.saveFailed'));
           return;
         }
         router.replace(`/trips/${tripId}` as Href);
@@ -98,7 +100,7 @@ export default function TripFormScreen() {
         router.replace(`/trips/${created.id}` as Href);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка сохранения.');
+      setError(e instanceof Error ? e.message : t('common.saveError'));
     } finally {
       setSaving(false);
     }
@@ -112,34 +114,34 @@ export default function TripFormScreen() {
     try {
       const ok = await deleteTrip(db, tripId);
       if (!ok) {
-        setError('Не удалось удалить поездку.');
+        setError(t('trips.deleteFailed'));
         return;
       }
       setDeleteVisible(false);
       router.replace('/trips' as Href);
     } catch {
-      setError('Не удалось удалить поездку.');
+      setError(t('trips.deleteFailed'));
     } finally {
       setDeleting(false);
     }
   };
 
   return (
-    <ScreenShell title={isEdit ? 'Редактировать поездку' : 'Новая поездка'} showBack>
+    <ScreenShell title={isEdit ? t('trips.formEdit') : t('trips.formNew')} showBack>
       {loading ? (
         <ScreenLoading />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
           <>
             <TextInput
-              label="Название"
+              label={t('trips.fieldTitle')}
               value={title}
               onChangeText={setTitle}
               variant="outlined"
               error={Boolean(fieldError)}
             />
             <TextInput
-              label="Описание"
+              label={t('trips.fieldDescription')}
               value={description}
               onChangeText={setDescription}
               variant="outlined"
@@ -147,21 +149,21 @@ export default function TripFormScreen() {
               numberOfLines={4}
             />
             <TextInput
-              label="Дата начала"
+              label={t('trips.fieldStartDate')}
               value={startDateText}
               onChangeText={setStartDateText}
               variant="outlined"
-              placeholder="ДД.ММ.ГГГГ"
+              placeholder={t('trips.datePlaceholder')}
             />
             <TextInput
-              label="Дата окончания"
+              label={t('trips.fieldEndDate')}
               value={endDateText}
               onChangeText={setEndDateText}
               variant="outlined"
-              placeholder="ДД.ММ.ГГГГ"
+              placeholder={t('trips.datePlaceholder')}
             />
             <View style={styles.switchRow}>
-              <Text variant="bodyLarge">Текущая поездка</Text>
+              <Text variant="bodyLarge">{t('trips.currentTripSwitch')}</Text>
               <Switch value={current} onValueChange={setCurrent} />
             </View>
             {fieldError ? (
@@ -170,11 +172,11 @@ export default function TripFormScreen() {
               </Text>
             ) : null}
             <Button mode="filled" onPress={() => void save()} loading={saving} disabled={saving}>
-              Сохранить
+              {t('common.save')}
             </Button>
             {isEdit ? (
               <Button mode="text" textColor="#B3261E" onPress={() => setDeleteVisible(true)}>
-                Удалить поездку
+                {t('trips.deleteTrip')}
               </Button>
             ) : null}
           </>
@@ -183,14 +185,14 @@ export default function TripFormScreen() {
 
       <Portal>
         <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>
-          <Dialog.Title>Удалить поездку?</Dialog.Title>
+          <Dialog.Title>{t('trips.deleteConfirmTitle')}</Dialog.Title>
           <Dialog.Content>
-            <Text variant="bodyMedium">Маршрут и заметки будут удалены без возможности восстановления.</Text>
+            <Text variant="bodyMedium">{t('trips.deleteConfirmBody')}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDeleteVisible(false)}>Отмена</Button>
+            <Button onPress={() => setDeleteVisible(false)}>{t('common.cancel')}</Button>
             <Button loading={deleting} disabled={deleting} onPress={() => void onDelete()}>
-              Удалить
+              {t('common.delete')}
             </Button>
           </Dialog.Actions>
         </Dialog>

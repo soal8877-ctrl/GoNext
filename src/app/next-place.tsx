@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Button, Snackbar, Text } from 'react-native-paper';
 import { type Href, router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
 import { ScreenShell } from '@/components/ScreenShell';
 import { ScreenEmpty, ScreenLoading } from '@/components/ScreenStatus';
@@ -23,6 +24,7 @@ type NextStopState = {
 
 export default function NextPlaceScreen() {
   const db = useSQLiteContext();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [noCurrentTrip, setNoCurrentTrip] = useState(false);
   const [allVisited, setAllVisited] = useState<{ trip: Trip } | null>(null);
@@ -52,14 +54,14 @@ export default function NextPlaceScreen() {
 
     const place = await getPlaceById(db, stop.placeId);
     if (!place) {
-      setSnackbar('Место из маршрута не найдено в справочнике.');
+      setSnackbar(t('nextPlace.stopNotInCatalog'));
       setLoading(false);
       return;
     }
 
     setNext({ trip, stop, place });
     setLoading(false);
-  }, [db]);
+  }, [db, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,13 +75,13 @@ export default function NextPlaceScreen() {
     }
     const coords = getCoordinates(next.place.latitude, next.place.longitude);
     if (!coords) {
-      setSnackbar('Для карты укажите координаты в карточке места.');
+      setSnackbar(t('nextPlace.mapNeedsCoords'));
       return;
     }
     try {
       await openPlaceOnMap(coords.latitude, coords.longitude, next.place.name);
     } catch {
-      setSnackbar('Не удалось открыть карту.');
+      setSnackbar(t('nextPlace.mapOpenFailed'));
     }
   };
 
@@ -89,13 +91,13 @@ export default function NextPlaceScreen() {
     }
     const coords = getCoordinates(next.place.latitude, next.place.longitude);
     if (!coords) {
-      setSnackbar('Для навигатора укажите координаты в карточке места.');
+      setSnackbar(t('nextPlace.navNeedsCoords'));
       return;
     }
     try {
       await openPlaceInNavigator(coords.latitude, coords.longitude, next.place.name);
     } catch {
-      setSnackbar('Не удалось открыть навигатор.');
+      setSnackbar(t('nextPlace.navOpenFailed'));
     }
   };
 
@@ -111,60 +113,59 @@ export default function NextPlaceScreen() {
       });
       await load();
     } catch {
-      setSnackbar('Не удалось отметить посещение.');
+      setSnackbar(t('nextPlace.markFailed'));
     } finally {
       setMarking(false);
     }
   };
 
+  const nextCoords = next ? getCoordinates(next.place.latitude, next.place.longitude) : null;
+
   return (
-    <ScreenShell title="Следующее место" showBack>
+    <ScreenShell title={t('nextPlace.title')} showBack>
       {loading ? (
         <ScreenLoading />
       ) : noCurrentTrip ? (
-        <ScreenEmpty
-          title="Нет текущей поездки"
-          hint="Назначьте поездку текущей в разделе «Поездки», чтобы увидеть следующую точку маршрута."
-        >
+        <ScreenEmpty title={t('nextPlace.noCurrentTitle')} hint={t('nextPlace.noCurrentHint')}>
           <Button mode="tonal" onPress={() => router.push('/trips' as Href)}>
-            К поездкам
+            {t('nextPlace.goTrips')}
           </Button>
         </ScreenEmpty>
       ) : allVisited ? (
         <ScreenEmpty
-          title="Маршрут пройден"
-          hint={`В поездке «${allVisited.trip.title}» все места отмечены как посещённые.`}
+          title={t('nextPlace.allVisitedTitle')}
+          hint={t('nextPlace.allVisitedHint', { title: allVisited.trip.title })}
         >
           <Button
             mode="tonal"
             onPress={() => router.push(`/trips/${allVisited.trip.id}` as Href)}
           >
-            Открыть поездку
+            {t('nextPlace.openTrip')}
           </Button>
         </ScreenEmpty>
       ) : next ? (
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text variant="labelLarge" style={styles.meta}>
-            Поездка: {next.trip.title}
+            {t('nextPlace.tripLabel', { title: next.trip.title })}
           </Text>
           <Text variant="headlineSmall">{next.place.name}</Text>
-          <Text variant="bodyLarge">{next.place.description || 'Нет описания'}</Text>
+          <Text variant="bodyLarge">{next.place.description || t('common.noDescription')}</Text>
           <Text variant="bodyMedium" style={styles.meta}>
-            {getCoordinates(next.place.latitude, next.place.longitude)
-              ? `Координаты: ${next.place.latitude}, ${next.place.longitude}`
-              : 'Координаты не заданы'}
+            {nextCoords
+              ? t('common.coordsLine', { lat: next.place.latitude, lon: next.place.longitude })
+              : t('common.coordsUnset')}
           </Text>
           <Button mode="tonal" icon="map" onPress={() => void openMap()}>
-            На карте
+            {t('nextPlace.onMap')}
           </Button>
           <Button mode="tonal" icon="navigation" onPress={() => void openNavigator()}>
-            Навигатор
+            {t('nextPlace.navigator')}
           </Button>
           <Button mode="filled" icon="check" loading={marking} onPress={() => void markVisited()}>
-            Отметить посещённым
+            {t('nextPlace.markVisited')}
           </Button>
           <Button mode="text" onPress={() => router.push(`/places/${next.place.id}` as Href)}>
-            Карточка места
+            {t('nextPlace.placeCard')}
           </Button>
         </ScrollView>
       ) : null}

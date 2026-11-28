@@ -1,26 +1,28 @@
 import { StyleSheet, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { type Href, router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { ScreenShell } from '@/components/ScreenShell';
 import { screenStyles } from '@/constants/screen';
 
 const MENU_ITEMS = [
-  { label: 'Места', href: '/places' as const },
-  { label: 'Поездки', href: '/trips' as const },
-  { label: 'Следующее место', href: '/next-place' as const },
-  { label: 'Выражения', href: '/phrases' as const },
-  { label: 'Настройки', href: '/settings' as const },
+  { labelKey: 'menu.places', href: '/places' as const },
+  { labelKey: 'menu.trips', href: '/trips' as const },
+  { labelKey: 'menu.nextPlace', href: '/next-place' as const },
+  { labelKey: 'menu.phrases', href: '/phrases' as const },
+  { labelKey: 'menu.settings', href: '/settings' as const },
 ] as const;
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <ScreenShell title="GoNext">
       <View style={screenStyles.body}>
         <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Дневник туриста
+          {t('home.tagline')}
         </Text>
         <View style={styles.menu}>
           {MENU_ITEMS.map((item) => (
@@ -30,7 +32,7 @@ export default function HomeScreen() {
               onPress={() => router.push(item.href as Href)}
               contentStyle={styles.menuButtonContent}
             >
-              {item.label}
+              {t(item.labelKey)}
             </Button>
           ))}
         </View>

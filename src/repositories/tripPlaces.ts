@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { translate } from '@/i18n';
+
 import { boolToSql, stringifyStringArray } from '@/db/json';
 import { mapTripPlaceRow, type TripPlaceRow } from '@/db/rows';
 import type { CreateTripPlaceInput, TripPlace, UpdateTripPlaceInput } from '@/types/entities';
@@ -92,7 +94,7 @@ export async function addPlaceToTrip(
 
   const tripPlace = await getTripPlaceById(db, result.lastInsertRowId);
   if (!tripPlace) {
-    throw new Error('Не удалось прочитать пункт маршрута.');
+    throw new Error(translate('errors.tripStopReadFailed'));
   }
   return tripPlace;
 }

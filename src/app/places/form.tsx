@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Snackbar, Switch, Text, TextInput } from 'react-native-paper';
 import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
 import { ScreenShell } from '@/components/ScreenShell';
 import { ScreenLoading } from '@/components/ScreenStatus';
@@ -16,6 +17,7 @@ import { createPlace, getPlaceById, updatePlace } from '@/repositories/places';
 
 export default function PlaceFormScreen() {
   const db = useSQLiteContext();
+  const { t } = useTranslation();
   const { id, tripId: tripIdParam } = useLocalSearchParams<{ id?: string; tripId?: string }>();
   const placeId = id ? Number(id) : null;
   const isEdit = placeId != null && Number.isFinite(placeId);
@@ -39,7 +41,7 @@ export default function PlaceFormScreen() {
     setLoading(true);
     const place = await getPlaceById(db, placeId);
     if (!place) {
-      setError('Место не найдено.');
+      setError(t('places.notFoundLoad'));
       setLoading(false);
       return;
     }
@@ -49,7 +51,7 @@ export default function PlaceFormScreen() {
     setLiked(place.liked);
     setCoordinatesText(formatCoordinatePairForInput(place.latitude, place.longitude));
     setLoading(false);
-  }, [db, isEdit, placeId]);
+  }, [db, isEdit, placeId, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -61,7 +63,7 @@ export default function PlaceFormScreen() {
     setFieldError(null);
     const trimmedName = name.trim();
     if (!trimmedName) {
-      setFieldError('Введите название места.');
+      setFieldError(t('places.nameRequired'));
       return;
     }
 
@@ -85,7 +87,7 @@ export default function PlaceFormScreen() {
       if (isEdit && placeId != null) {
         const updated = await updatePlace(db, placeId, payload);
         if (!updated) {
-          setError('Не удалось сохранить изменения.');
+          setError(t('common.saveFailed'));
           return;
         }
         router.replace(`/places/${placeId}` as Href);
@@ -99,28 +101,28 @@ export default function PlaceFormScreen() {
         }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка сохранения.');
+      setError(e instanceof Error ? e.message : t('common.saveError'));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <ScreenShell title={isEdit ? 'Редактировать место' : 'Новое место'} showBack>
+    <ScreenShell title={isEdit ? t('places.formEdit') : t('places.formNew')} showBack>
       {loading ? (
         <ScreenLoading />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
           <>
             <TextInput
-              label="Название"
+              label={t('places.fieldName')}
               value={name}
               onChangeText={setName}
               variant="outlined"
               error={Boolean(fieldError)}
             />
             <TextInput
-              label="Описание"
+              label={t('places.fieldDescription')}
               value={description}
               onChangeText={setDescription}
               variant="outlined"
@@ -128,15 +130,15 @@ export default function PlaceFormScreen() {
               numberOfLines={4}
             />
             <View style={styles.switchRow}>
-              <Text variant="bodyLarge">Хочу посетить</Text>
+              <Text variant="bodyLarge">{t('places.wantVisit')}</Text>
               <Switch value={visitLater} onValueChange={setVisitLater} />
             </View>
             <View style={styles.switchRow}>
-              <Text variant="bodyLarge">Понравилось</Text>
+              <Text variant="bodyLarge">{t('places.liked')}</Text>
               <Switch value={liked} onValueChange={setLiked} />
             </View>
             <TextInput
-              label="Координаты (широта, долгота)"
+              label={t('places.fieldCoords')}
               value={coordinatesText}
               onChangeText={setCoordinatesText}
               variant="outlined"
@@ -150,7 +152,7 @@ export default function PlaceFormScreen() {
               </Text>
             ) : null}
             <Button mode="filled" onPress={() => void save()} loading={saving} disabled={saving}>
-              Сохранить
+              {t('common.save')}
             </Button>
           </>
         </ScrollView>

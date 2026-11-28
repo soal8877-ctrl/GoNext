@@ -1,3 +1,5 @@
+import { translate } from '@/i18n';
+
 export type CoordParseResult =
   | { ok: true; value: number | null }
   | { ok: false; message: string };
@@ -9,10 +11,10 @@ export function parseOptionalLatitude(input: string): CoordParseResult {
   }
   const value = Number(trimmed.replace(',', '.'));
   if (!Number.isFinite(value)) {
-    return { ok: false, message: 'Широта должна быть числом.' };
+    return { ok: false, message: translate('validation.latitudeNaN') };
   }
   if (value < -90 || value > 90) {
-    return { ok: false, message: 'Широта: от -90 до 90.' };
+    return { ok: false, message: translate('validation.latitudeRange') };
   }
   return { ok: true, value };
 }
@@ -24,10 +26,10 @@ export function parseOptionalLongitude(input: string): CoordParseResult {
   }
   const value = Number(trimmed.replace(',', '.'));
   if (!Number.isFinite(value)) {
-    return { ok: false, message: 'Долгота должна быть числом.' };
+    return { ok: false, message: translate('validation.longitudeNaN') };
   }
   if (value < -180 || value > 180) {
-    return { ok: false, message: 'Долгота: от -180 до 180.' };
+    return { ok: false, message: translate('validation.longitudeRange') };
   }
   return { ok: true, value };
 }
@@ -37,12 +39,12 @@ type CoordComponentParseResult = { ok: true; value: number } | { ok: false; mess
 function parseCoordinateComponent(raw: string): CoordComponentParseResult {
   const trimmed = raw.trim();
   if (!trimmed) {
-    return { ok: false, message: 'Координаты: укажите два числа или оставьте поле пустым.' };
+    return { ok: false, message: translate('validation.coordsNeedTwo') };
   }
   const normalized = trimmed.includes('.') ? trimmed : trimmed.replace(',', '.');
   const value = Number(normalized);
   if (!Number.isFinite(value)) {
-    return { ok: false, message: 'Координаты должны быть числами.' };
+    return { ok: false, message: translate('validation.coordsNaN') };
   }
   return { ok: true, value };
 }
@@ -68,7 +70,7 @@ export function parseOptionalCoordinatePair(input: string): CoordinatePairParseR
   if (parts.length !== 2) {
     return {
       ok: false,
-      message: 'Введите широту и долготу через запятую, например: 55.744920, 37.604677',
+      message: translate('validation.coordsPairExample'),
     };
   }
 
@@ -77,7 +79,7 @@ export function parseOptionalCoordinatePair(input: string): CoordinatePairParseR
     return { ok: false, message: lat.message };
   }
   if (lat.value < -90 || lat.value > 90) {
-    return { ok: false, message: 'Широта: от -90 до 90.' };
+    return { ok: false, message: translate('validation.latitudeRange') };
   }
 
   const lon = parseCoordinateComponent(parts[1]);
@@ -85,7 +87,7 @@ export function parseOptionalCoordinatePair(input: string): CoordinatePairParseR
     return { ok: false, message: lon.message };
   }
   if (lon.value < -180 || lon.value > 180) {
-    return { ok: false, message: 'Долгота: от -180 до 180.' };
+    return { ok: false, message: translate('validation.longitudeRange') };
   }
 
   return { ok: true, latitude: lat.value, longitude: lon.value };

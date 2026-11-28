@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { FAB, List, Text } from 'react-native-paper';
 import { type Href, router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenShell } from '@/components/ScreenShell';
@@ -14,6 +15,7 @@ import type { Place } from '@/types/entities';
 export default function PlacesListScreen() {
   const db = useSQLiteContext();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const fabBottom = fabBottomInset(insets.bottom);
@@ -33,14 +35,11 @@ export default function PlacesListScreen() {
   );
 
   return (
-    <ScreenShell title="Места" showBack>
+    <ScreenShell title={t('places.title')} showBack>
       {loading && places.length === 0 ? (
         <ScreenLoading />
       ) : places.length === 0 ? (
-        <ScreenEmpty
-          title="Пока нет мест"
-          hint="Добавьте интересные точки для будущих поездок."
-        />
+        <ScreenEmpty title={t('places.emptyTitle')} hint={t('places.emptyHint')} />
       ) : (
         <FlatList
           data={places}
@@ -49,13 +48,13 @@ export default function PlacesListScreen() {
           renderItem={({ item }) => (
             <List.Item
               title={item.name}
-              description={item.description || 'Без описания'}
+              description={item.description || t('common.noDescriptionShort')}
               descriptionNumberOfLines={2}
               onPress={() => router.push(`/places/${item.id}` as Href)}
               right={() =>
                 item.visitLater || item.liked ? (
                   <View style={styles.badges}>
-                    {item.visitLater ? <Text variant="labelSmall">★ позже</Text> : null}
+                    {item.visitLater ? <Text variant="labelSmall">{t('common.laterBadge')}</Text> : null}
                     {item.liked ? <Text variant="labelSmall">♥</Text> : null}
                   </View>
                 ) : null
@@ -66,7 +65,7 @@ export default function PlacesListScreen() {
       )}
       <FAB
         icon="plus"
-        aria-label="Добавить место"
+        aria-label={t('places.fabAdd')}
         style={[styles.fab, { bottom: fabBottom }]}
         onPress={() => router.push('/places/form' as Href)}
       />

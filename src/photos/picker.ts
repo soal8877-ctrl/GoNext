@@ -1,6 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
 
+import { translate } from '@/i18n';
+
 const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
   mediaTypes: ['images'],
   quality: 0.85,
@@ -12,7 +14,6 @@ export type PickPermissionResult =
   | { ok: false; message: string };
 
 async function ensureLibraryPermission(): Promise<PickPermissionResult> {
-  // Android 13+ (API 33): системный Photo Picker работает без READ_MEDIA_IMAGES.
   if (Platform.OS === 'android' && typeof Platform.Version === 'number' && Platform.Version >= 33) {
     return { ok: true };
   }
@@ -27,7 +28,7 @@ async function ensureLibraryPermission(): Promise<PickPermissionResult> {
   }
   return {
     ok: false,
-    message: 'Нет доступа к галерее. Разрешите доступ для Expo Go в настройках телефона.',
+    message: translate('picker.galleryDenied'),
   };
 }
 
@@ -42,7 +43,7 @@ async function ensureCameraPermission(): Promise<PickPermissionResult> {
   }
   return {
     ok: false,
-    message: 'Нет доступа к камере. Разрешите доступ для Expo Go в настройках телефона.',
+    message: translate('picker.cameraDenied'),
   };
 }
 
@@ -50,7 +51,7 @@ export async function pickImageFromLibrary(): Promise<
   { uri: string } | { cancelled: true } | { error: string }
 > {
   if (Platform.OS === 'web') {
-    return { error: 'Добавление фото на web не поддерживается. Используйте Expo Go на телефоне.' };
+    return { error: translate('picker.webLibrary') };
   }
   const permission = await ensureLibraryPermission();
   if (!permission.ok) {
@@ -67,7 +68,7 @@ export async function takePhotoWithCamera(): Promise<
   { uri: string } | { cancelled: true } | { error: string }
 > {
   if (Platform.OS === 'web') {
-    return { error: 'Съёмка на web не поддерживается. Используйте Expo Go на телефоне.' };
+    return { error: translate('picker.webCamera') };
   }
   const permission = await ensureCameraPermission();
   if (!permission.ok) {

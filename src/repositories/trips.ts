@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { translate } from '@/i18n';
+
 import { boolToSql } from '@/db/json';
 import { mapTripRow, type TripRow } from '@/db/rows';
 import type { CreateTripInput, Trip, UpdateTripInput } from '@/types/entities';
@@ -49,7 +51,7 @@ export async function createTrip(db: SQLiteDatabase, input: CreateTripInput): Pr
 
   const trip = await getTripById(db, tripId);
   if (!trip) {
-    throw new Error('Не удалось прочитать созданную поездку.');
+    throw new Error(translate('errors.tripReadFailed'));
   }
   return trip;
 }

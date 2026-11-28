@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon, Text, useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 import { screenPadding } from '@/constants/screen';
 import { PRIMARY_COLOR_PRESETS } from '@/theme/primaryColorPresets';
@@ -25,11 +26,12 @@ function checkIconColor(swatchHex: string): string {
 
 export function ThemePrimaryColorPicker({ value, onChange }: ThemePrimaryColorPickerProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.wrap}>
       <Text variant="bodyMedium" style={styles.hint}>
-        Основной цвет интерфейса (кнопки, акценты)
+        {t('settings.primaryHint')}
       </Text>
       <View style={styles.grid} accessibilityRole="radiogroup">
         {PRIMARY_COLOR_PRESETS.map((preset) => {
@@ -39,7 +41,7 @@ export function ThemePrimaryColorPicker({ value, onChange }: ThemePrimaryColorPi
               key={preset.id}
               onPress={() => onChange(preset.id)}
               accessibilityRole="radio"
-              accessibilityLabel={preset.label}
+              accessibilityLabel={t(`colorPresets.${preset.id}`)}
               accessibilityState={{ selected }}
               style={({ pressed }) => [
                 styles.hit,

@@ -3,11 +3,13 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Divider, List, SegmentedButtons, Text } from 'react-native-paper';
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
 import { ScreenShell } from '@/components/ScreenShell';
 import { ThemePrimaryColorPicker } from '@/components/ThemePrimaryColorPicker';
 import { ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
+import { useAppLanguage } from '@/i18n/useAppLanguage';
 import { listPlaces, listTrips } from '@/repositories';
 import { useThemePreference } from '@/theme/ThemePreferenceContext';
 
@@ -15,6 +17,8 @@ export default function SettingsScreen() {
   const version = Constants.expoConfig?.version ?? '1.0.0';
   const sdkVersion = Constants.expoConfig?.sdkVersion ?? '—';
   const db = useSQLiteContext();
+  const { t } = useTranslation();
+  const { language, setLanguage } = useAppLanguage();
   const { mode, setMode, primaryColorId, setPrimaryColorId } = useThemePreference();
   const [counts, setCounts] = useState<{ places: number; trips: number } | null>(null);
 
@@ -26,16 +30,33 @@ export default function SettingsScreen() {
   }, [db]);
 
   return (
-    <ScreenShell title="Настройки" showBack>
+    <ScreenShell title={t('settings.title')} showBack>
       {counts === null ? (
         <ScreenLoading />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text variant="bodyMedium" style={styles.lead}>
-            GoNext — дневник туриста. Все режимы из главного меню доступны без регистрации.
+            {t('settings.lead')}
           </Text>
           <List.Section>
-            <List.Subheader>Оформление</List.Subheader>
+            <List.Subheader>{t('settings.appearance')}</List.Subheader>
+            <View style={styles.themeRow}>
+              <Text variant="labelLarge" style={styles.rowLabel}>
+                {t('settings.language')}
+              </Text>
+              <SegmentedButtons
+                value={language}
+                onValueChange={(value) => {
+                  if (value === 'ru' || value === 'en') {
+                    void setLanguage(value);
+                  }
+                }}
+                buttons={[
+                  { value: 'ru', label: t('settings.langRu') },
+                  { value: 'en', label: t('settings.langEn') },
+                ]}
+              />
+            </View>
             <View style={styles.themeRow}>
               <SegmentedButtons
                 value={mode}
@@ -45,63 +66,63 @@ export default function SettingsScreen() {
                   }
                 }}
                 buttons={[
-                  { value: 'light', label: 'Светлая', icon: 'white-balance-sunny' },
-                  { value: 'dark', label: 'Тёмная', icon: 'weather-night' },
+                  { value: 'light', label: t('settings.themeLight'), icon: 'white-balance-sunny' },
+                  { value: 'dark', label: t('settings.themeDark'), icon: 'weather-night' },
                 ]}
               />
             </View>
             <ThemePrimaryColorPicker value={primaryColorId} onChange={setPrimaryColorId} />
             <List.Item
-              title="Фон экранов"
+              title={t('settings.backgroundTitle')}
               description={
-                mode === 'light'
-                  ? 'В светлой теме показывается декоративное изображение.'
-                  : 'В тёмной теме фоновое изображение отключено.'
+                mode === 'light' ? t('settings.backgroundLight') : t('settings.backgroundDark')
               }
               left={(props) => <List.Icon {...props} icon="image-outline" />}
             />
             <Divider />
           </List.Section>
           <List.Section>
-            <List.Subheader>Данные на устройстве</List.Subheader>
+            <List.Subheader>{t('settings.dataOnDevice')}</List.Subheader>
             <List.Item
-              title="Локальное хранение"
-              description="Места, поездки и фото не отправляются на сервер. Резервное копирование в MVP не предусмотрено."
+              title={t('settings.localStorageTitle')}
+              description={t('settings.localStorageDesc')}
               left={(props) => <List.Icon {...props} icon="database" />}
             />
             <Divider />
             <List.Item
-              title="Справочник и поездки"
-              description={`Мест: ${counts.places}, поездок: ${counts.trips}.`}
+              title={t('settings.countsTitle')}
+              description={t('settings.countsDesc', {
+                places: counts.places,
+                trips: counts.trips,
+              })}
               left={(props) => <List.Icon {...props} icon="counter" />}
             />
           </List.Section>
           <List.Section>
-            <List.Subheader>Офлайн и карты</List.Subheader>
+            <List.Subheader>{t('settings.offlineMaps')}</List.Subheader>
             <List.Item
-              title="Авиарежим"
-              description="Списки, поездки, «Выражения» и фото на устройстве работают без интернета."
+              title={t('settings.offlineTitle')}
+              description={t('settings.offlineDesc')}
               left={(props) => <List.Icon {...props} icon="airplane" />}
             />
             <Divider />
             <List.Item
-              title="Карта и навигатор"
-              description="Открывают внешние приложения; для маршрута может понадобиться сеть."
+              title={t('settings.mapsTitle')}
+              description={t('settings.mapsDesc')}
               left={(props) => <List.Icon {...props} icon="map" />}
             />
           </List.Section>
           <List.Section>
-            <List.Subheader>О приложении</List.Subheader>
+            <List.Subheader>{t('settings.about')}</List.Subheader>
             <List.Item
-              title={`Версия ${version}`}
-              description={`Expo SDK ${sdkVersion}`}
+              title={t('settings.version', { version })}
+              description={t('settings.sdk', { version: sdkVersion })}
               left={(props) => <List.Icon {...props} icon="information" />}
             />
           </List.Section>
           <View style={styles.footer}>
             <Text variant="labelMedium" style={styles.footerText}>
-              Сброс базы в MVP не предусмотрен. Для полной очистки — удалите данные Expo Go для
-              этого проекта или переустановите dev-сборку.
+              {t('settings.footerReset')}
             </Text>
           </View>
         </ScrollView>
@@ -123,6 +144,10 @@ const styles = StyleSheet.create({
   themeRow: {
     paddingHorizontal: screenPadding,
     paddingBottom: 8,
+    gap: 8,
+  },
+  rowLabel: {
+    opacity: 0.85,
   },
   footer: {
     paddingHorizontal: screenPadding,

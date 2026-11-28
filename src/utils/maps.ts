@@ -1,5 +1,7 @@
 import { Linking, Platform } from 'react-native';
 
+import { translate } from '@/i18n';
+
 function googleMapsWebUrl(latitude: number, longitude: number): string {
   return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
 }
@@ -9,7 +11,7 @@ export async function openPlaceOnMap(
   longitude: number,
   label?: string
 ): Promise<void> {
-  const title = encodeURIComponent(label ?? 'Место');
+  const title = encodeURIComponent(label ?? translate('common.placeFallback'));
   const webUrl = googleMapsWebUrl(latitude, longitude);
 
   if (Platform.OS === 'web') {
@@ -50,7 +52,7 @@ export async function openPlaceInNavigator(
   label?: string
 ): Promise<void> {
   const webUrl = googleMapsDirectionsUrl(latitude, longitude);
-  const title = encodeURIComponent(label ?? 'Место');
+  const title = encodeURIComponent(label ?? translate('common.placeFallback'));
 
   if (Platform.OS === 'web') {
     await Linking.openURL(webUrl);

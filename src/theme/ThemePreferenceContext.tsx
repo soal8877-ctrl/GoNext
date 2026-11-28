@@ -40,7 +40,7 @@ const ThemePreferenceContext = createContext<ThemePreferenceContextValue | null>
 export function useThemePreference(): ThemePreferenceContextValue {
   const value = useContext(ThemePreferenceContext);
   if (!value) {
-    throw new Error('useThemePreference: оберните приложение в AppThemeProvider');
+    throw new Error('useThemePreference must be used within AppThemeProvider');
   }
   return value;
 }

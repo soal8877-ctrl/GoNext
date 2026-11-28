@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { translate } from '@/i18n';
+
 import { boolToSql, stringifyStringArray } from '@/db/json';
 import { mapPlaceRow, type PlaceRow } from '@/db/rows';
 import type { CreatePlaceInput, Place, UpdatePlaceInput } from '@/types/entities';
@@ -36,7 +38,7 @@ export async function createPlace(db: SQLiteDatabase, input: CreatePlaceInput): 
 
   const place = await getPlaceById(db, result.lastInsertRowId);
   if (!place) {
-    throw new Error('Не удалось прочитать созданное место.');
+    throw new Error(translate('errors.placeReadFailed'));
   }
   return place;
 }

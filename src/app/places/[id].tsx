@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Dialog, Portal, Snackbar, Switch, Text } from 'react-native-paper';
 import { type Href, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 
 import { PhotoGallery } from '@/components/PhotoGallery';
 import { ScreenShell } from '@/components/ScreenShell';
@@ -16,6 +17,7 @@ import { openPlaceOnMap } from '@/utils/maps';
 
 export default function PlaceDetailScreen() {
   const db = useSQLiteContext();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const placeId = Number(id);
 
@@ -64,7 +66,7 @@ export default function PlaceDetailScreen() {
       }
       const ok = await deletePlace(db, place.id);
       if (!ok) {
-        setSnackbar('Не удалось удалить место.');
+        setSnackbar(t('places.deleteFailed'));
         return;
       }
       setDeleteVisible(false);
@@ -72,9 +74,9 @@ export default function PlaceDetailScreen() {
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       if (message.includes('FOREIGN KEY') || message.includes('constraint')) {
-        setSnackbar('Место используется в поездке — сначала уберите его из маршрута.');
+        setSnackbar(t('places.deleteInUse'));
       } else {
-        setSnackbar('Не удалось удалить место.');
+        setSnackbar(t('places.deleteFailed'));
       }
     } finally {
       setDeleting(false);
@@ -87,39 +89,41 @@ export default function PlaceDetailScreen() {
     }
     const coords = getCoordinates(place.latitude, place.longitude);
     if (!coords) {
-      setSnackbar('Для карты укажите широту и долготу.');
+      setSnackbar(t('places.mapNeedsCoords'));
       return;
     }
     try {
       await openPlaceOnMap(coords.latitude, coords.longitude, place.name);
     } catch {
-      setSnackbar('Не удалось открыть карту.');
+      setSnackbar(t('places.mapOpenFailed'));
     }
   };
 
+  const coords = place ? getCoordinates(place.latitude, place.longitude) : null;
+
   return (
-    <ScreenShell title={place?.name ?? 'Место'} showBack>
+    <ScreenShell title={place?.name ?? t('places.detailTitle')} showBack>
       {loading ? (
         <ScreenLoading />
       ) : !place ? (
-        <ScreenEmpty title="Место не найдено" hint="Возможно, запись была удалена." />
+        <ScreenEmpty title={t('places.notFound')} hint={t('common.recordMaybeDeleted')} />
       ) : (
         <ScrollView contentContainerStyle={styles.scroll}>
-          <Text variant="bodyLarge">{place.description || 'Нет описания'}</Text>
+          <Text variant="bodyLarge">{place.description || t('common.noDescription')}</Text>
           <Text variant="bodyMedium" style={styles.meta}>
-            {getCoordinates(place.latitude, place.longitude)
-              ? `Координаты: ${place.latitude}, ${place.longitude}`
-              : 'Координаты не заданы'}
+            {coords
+              ? t('common.coordsLine', { lat: place.latitude, lon: place.longitude })
+              : t('common.coordsUnset')}
           </Text>
           <View style={styles.switchRow}>
-            <Text variant="bodyLarge">Хочу посетить</Text>
+            <Text variant="bodyLarge">{t('places.wantVisit')}</Text>
             <Switch
               value={place.visitLater}
               onValueChange={(value) => void toggleFlag('visitLater', value)}
             />
           </View>
           <View style={styles.switchRow}>
-            <Text variant="bodyLarge">Понравилось</Text>
+            <Text variant="bodyLarge">{t('places.liked')}</Text>
             <Switch value={place.liked} onValueChange={(value) => void toggleFlag('liked', value)} />
           </View>
           <PhotoGallery
@@ -135,32 +139,30 @@ export default function PlaceDetailScreen() {
             onNotify={(message) => setSnackbar(message)}
           />
           <Button mode="tonal" icon="map" onPress={() => void openMap()}>
-            На карте
+            {t('places.onMap')}
           </Button>
           <Button
             mode="outlined"
             onPress={() => router.push(`/places/form?id=${place.id}` as Href)}
           >
-            Редактировать
+            {t('common.edit')}
           </Button>
           <Button mode="text" textColor="#B3261E" onPress={() => setDeleteVisible(true)}>
-            Удалить
+            {t('common.delete')}
           </Button>
         </ScrollView>
       )}
 
       <Portal>
         <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>
-          <Dialog.Title>Удалить место?</Dialog.Title>
+          <Dialog.Title>{t('places.deleteConfirmTitle')}</Dialog.Title>
           <Dialog.Content>
-            <Text variant="bodyMedium">
-              «{place?.name}» будет удалено без возможности восстановления.
-            </Text>
+            <Text variant="bodyMedium">{t('places.deleteConfirmBody', { name: place?.name ?? '' })}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDeleteVisible(false)}>Отмена</Button>
+            <Button onPress={() => setDeleteVisible(false)}>{t('common.cancel')}</Button>
             <Button loading={deleting} disabled={deleting} onPress={() => void onDelete()}>
-              Удалить
+              {t('common.delete')}
             </Button>
           </Dialog.Actions>
         </Dialog>

@@ -1,17 +1,20 @@
 import { FlatList, StyleSheet, View } from 'react-native';
 import { Divider, List, Text } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 import { ScreenShell } from '@/components/ScreenShell';
 import { TRAVEL_PHRASES } from '@/constants/travelPhrases';
 import { screenPadding } from '@/constants/screen';
 
-/** Экран «Выражения» (PROJECT.md §4.4): фиксированный список, без БД и сети. */
 export default function PhrasesScreen() {
+  const { t, i18n } = useTranslation();
+  const uiEn = i18n.language === 'en';
+
   return (
-    <ScreenShell title="Выражения" showBack>
+    <ScreenShell title={t('phrases.title')} showBack>
       <View style={styles.listWrap}>
         <Text variant="bodyMedium" style={styles.hint}>
-          Десять частых фраз для поездки. Работает без интернета.
+          {t('phrases.hint')}
         </Text>
         <FlatList
           data={TRAVEL_PHRASES}
@@ -20,8 +23,8 @@ export default function PhrasesScreen() {
           ItemSeparatorComponent={Divider}
           renderItem={({ item, index }) => (
             <List.Item
-              title={item.en}
-              description={item.ru}
+              title={uiEn ? item.en : item.ru}
+              description={uiEn ? item.ru : item.en}
               titleNumberOfLines={2}
               descriptionNumberOfLines={2}
               left={() => (

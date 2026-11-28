@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { Chip, FAB, List } from 'react-native-paper';
 import { type Href, router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenShell } from '@/components/ScreenShell';
@@ -15,6 +16,7 @@ import { formatTripDateRange } from '@/utils/dates';
 export default function TripsListScreen() {
   const db = useSQLiteContext();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const fabBottom = fabBottomInset(insets.bottom);
   const listBottomPadding = listBottomInsetForFab(insets.bottom);
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -34,14 +36,11 @@ export default function TripsListScreen() {
   );
 
   return (
-    <ScreenShell title="Поездки" showBack>
+    <ScreenShell title={t('trips.title')} showBack>
       {loading && trips.length === 0 ? (
         <ScreenLoading />
       ) : trips.length === 0 ? (
-        <ScreenEmpty
-          title="Пока нет поездок"
-          hint="Спланируйте маршрут и отмечайте посещённые места по ходу пути."
-        />
+        <ScreenEmpty title={t('trips.emptyTitle')} hint={t('trips.emptyHint')} />
       ) : (
         <FlatList
           data={trips}
@@ -57,7 +56,7 @@ export default function TripsListScreen() {
                 item.current ? (
                   <View style={styles.badge}>
                     <Chip compact mode="flat">
-                      Текущая
+                      {t('trips.current')}
                     </Chip>
                   </View>
                 ) : null
@@ -68,7 +67,7 @@ export default function TripsListScreen() {
       )}
       <FAB
         icon="plus"
-        aria-label="Добавить поездку"
+        aria-label={t('trips.fabAdd')}
         style={[styles.fab, { bottom: fabBottom }]}
         onPress={() => router.push('/trips/form' as Href)}
       />

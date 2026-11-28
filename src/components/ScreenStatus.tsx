@@ -1,18 +1,23 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text, useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 import { screenPadding } from '@/constants/screen';
 
-/** Единый индикатор загрузки данных экрана (этап 8). */
 export function ScreenLoading() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
-    <View style={styles.centered} accessibilityRole="progressbar" accessibilityLabel="Загрузка">
+    <View
+      style={styles.centered}
+      accessibilityRole="progressbar"
+      accessibilityLabel={t('common.loading')}
+    >
       <ActivityIndicator animating size="large" />
       <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-        Загрузка…
+        {t('common.loading')}
       </Text>
     </View>
   );
@@ -24,7 +29,6 @@ type ScreenEmptyProps = {
   children?: ReactNode;
 };
 
-/** Пустое состояние или сообщение об отсутствии данных. */
 export function ScreenEmpty({ title, hint, children }: ScreenEmptyProps) {
   return (
     <View style={styles.centered}>
