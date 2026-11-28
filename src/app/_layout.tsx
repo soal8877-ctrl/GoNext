@@ -1,17 +1,17 @@
-import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DatabaseProvider } from '@/components/DatabaseProvider';
 import { RootNavigator } from '@/components/RootNavigator';
+import { AppThemeProvider } from '@/theme/ThemePreferenceContext';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <PaperProvider>
+      <AppThemeProvider>
         <DatabaseProvider>
           <RootNavigator />
         </DatabaseProvider>
-      </PaperProvider>
+      </AppThemeProvider>
     </SafeAreaProvider>
   );
 }

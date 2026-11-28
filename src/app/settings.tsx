@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Divider, List, Text } from 'react-native-paper';
+import { Divider, List, SegmentedButtons, Text } from 'react-native-paper';
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -8,11 +8,13 @@ import { ScreenShell } from '@/components/ScreenShell';
 import { ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
 import { listPlaces, listTrips } from '@/repositories';
+import { useThemePreference } from '@/theme/ThemePreferenceContext';
 
 export default function SettingsScreen() {
   const version = Constants.expoConfig?.version ?? '1.0.0';
   const sdkVersion = Constants.expoConfig?.sdkVersion ?? '—';
   const db = useSQLiteContext();
+  const { mode, setMode } = useThemePreference();
   const [counts, setCounts] = useState<{ places: number; trips: number } | null>(null);
 
   useEffect(() => {
@@ -31,6 +33,33 @@ export default function SettingsScreen() {
           <Text variant="bodyMedium" style={styles.lead}>
             GoNext — дневник туриста. Все режимы из главного меню доступны без регистрации.
           </Text>
+          <List.Section>
+            <List.Subheader>Оформление</List.Subheader>
+            <View style={styles.themeRow}>
+              <SegmentedButtons
+                value={mode}
+                onValueChange={(value) => {
+                  if (value === 'light' || value === 'dark') {
+                    setMode(value);
+                  }
+                }}
+                buttons={[
+                  { value: 'light', label: 'Светлая', icon: 'white-balance-sunny' },
+                  { value: 'dark', label: 'Тёмная', icon: 'weather-night' },
+                ]}
+              />
+            </View>
+            <List.Item
+              title="Фон экранов"
+              description={
+                mode === 'light'
+                  ? 'В светлой теме показывается декоративное изображение.'
+                  : 'В тёмной теме фоновое изображение отключено.'
+              }
+              left={(props) => <List.Icon {...props} icon="image-outline" />}
+            />
+            <Divider />
+          </List.Section>
           <List.Section>
             <List.Subheader>Данные на устройстве</List.Subheader>
             <List.Item
@@ -88,6 +117,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 4,
     opacity: 0.9,
+  },
+  themeRow: {
+    paddingHorizontal: screenPadding,
+    paddingBottom: 8,
   },
   footer: {
     paddingHorizontal: screenPadding,
