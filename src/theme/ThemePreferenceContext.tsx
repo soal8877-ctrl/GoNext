@@ -9,15 +9,28 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { DarkTheme, LightTheme, PaperProvider } from 'react-native-paper';
+import { PaperProvider } from 'react-native-paper';
+
+import { buildPaperThemeById } from '@/theme/buildPaperTheme';
+import {
+  DEFAULT_PRIMARY_COLOR_ID,
+  PRIMARY_COLOR_PRESETS,
+} from '@/theme/primaryColorPresets';
 
 export type ThemeMode = 'light' | 'dark';
 
-const STORAGE_KEY = '@gonext/themeMode';
+const STORAGE_KEY_MODE = '@gonext/themeMode';
+const STORAGE_KEY_PRIMARY = '@gonext/primaryColorId';
+
+function isPrimaryColorId(id: string): boolean {
+  return PRIMARY_COLOR_PRESETS.some((preset) => preset.id === id);
+}
 
 type ThemePreferenceContextValue = {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
+  primaryColorId: string;
+  setPrimaryColorId: (id: string) => void;
   /** Декоративный фон включается только в светлой теме. */
   showBackgroundImage: boolean;
 };
@@ -38,31 +51,49 @@ type AppThemeProviderProps = {
 
 export function AppThemeProvider({ children }: AppThemeProviderProps) {
   const [mode, setModeState] = useState<ThemeMode>('light');
+  const [primaryColorId, setPrimaryColorIdState] = useState(DEFAULT_PRIMARY_COLOR_ID);
 
   useEffect(() => {
     void (async () => {
       try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        if (stored === 'light' || stored === 'dark') {
-          setModeState(stored);
+        const [storedMode, storedPrimary] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEY_MODE),
+          AsyncStorage.getItem(STORAGE_KEY_PRIMARY),
+        ]);
+        if (storedMode === 'light' || storedMode === 'dark') {
+          setModeState(storedMode);
+        }
+        if (storedPrimary && isPrimaryColorId(storedPrimary)) {
+          setPrimaryColorIdState(storedPrimary);
         }
       } catch {
-        // оставляем светлую тему по умолчанию
+        // значения по умолчанию
       }
     })();
   }, []);
 
   const setMode = useCallback((next: ThemeMode) => {
     setModeState(next);
-    void AsyncStorage.setItem(STORAGE_KEY, next);
+    void AsyncStorage.setItem(STORAGE_KEY_MODE, next);
   }, []);
 
-  const paperTheme = mode === 'dark' ? DarkTheme : LightTheme;
+  const setPrimaryColorId = useCallback((id: string) => {
+    if (!isPrimaryColorId(id)) {
+      return;
+    }
+    setPrimaryColorIdState(id);
+    void AsyncStorage.setItem(STORAGE_KEY_PRIMARY, id);
+  }, []);
+
+  const paperTheme = useMemo(
+    () => buildPaperThemeById(mode, primaryColorId),
+    [mode, primaryColorId]
+  );
   const showBackgroundImage = mode === 'light';
 
   const contextValue = useMemo(
-    () => ({ mode, setMode, showBackgroundImage }),
-    [mode, setMode, showBackgroundImage]
+    () => ({ mode, setMode, primaryColorId, setPrimaryColorId, showBackgroundImage }),
+    [mode, setMode, primaryColorId, setPrimaryColorId, showBackgroundImage]
   );
 
   return (

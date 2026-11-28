@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { ScreenShell } from '@/components/ScreenShell';
+import { ThemePrimaryColorPicker } from '@/components/ThemePrimaryColorPicker';
 import { ScreenLoading } from '@/components/ScreenStatus';
 import { screenPadding } from '@/constants/screen';
 import { listPlaces, listTrips } from '@/repositories';
@@ -14,7 +15,7 @@ export default function SettingsScreen() {
   const version = Constants.expoConfig?.version ?? '1.0.0';
   const sdkVersion = Constants.expoConfig?.sdkVersion ?? '—';
   const db = useSQLiteContext();
-  const { mode, setMode } = useThemePreference();
+  const { mode, setMode, primaryColorId, setPrimaryColorId } = useThemePreference();
   const [counts, setCounts] = useState<{ places: number; trips: number } | null>(null);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function SettingsScreen() {
                 ]}
               />
             </View>
+            <ThemePrimaryColorPicker value={primaryColorId} onChange={setPrimaryColorId} />
             <List.Item
               title="Фон экранов"
               description={
